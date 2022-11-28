@@ -1,34 +1,12 @@
+import os
 import socket
+import errno
 
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-PORT =6789  # Port to listen on (non-privileged ports are > 1023)
+HOST = "127.0.0.1"  # The server's hostname or IP address
+PORT  = 5678 # receiving client port
 port1 = 4567#נתב
 port2 = 0
-data=""
-
-#receiv message from sending client
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as  s:
-    s.bind((HOST, PORT))
-    s.listen()
-    conn, addr = s.accept()
-    with conn:
-        print(f"Connected by {addr}")
-        data = conn.recv(1024)
-        print(data.decode())
-s.close()
-
-saves_msg = data
-
-#receiv message from receiving client
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as  s:
-    s.bind((HOST, PORT))
-    s.listen()
-    conn, addr = s.accept()
-    with conn:
-        print(f"Connected by {addr}")
-        data = conn.recv(1024)
-        print(data.decode())
-s.close()
+data =""
 
 #sending message to נתב to get a route
 try:
@@ -55,7 +33,7 @@ data = data[4:]#sending data without the next port
 try:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, int(port2)))
-        s.sendall(data.encode() + saves_msg )
+        s.sendall(data.encode() + b"Give me msg pls" )
 except socket.error as error:
     if error.errno == errno.ECONNREFUSED:
         print("Connection refused")
@@ -66,4 +44,15 @@ except socket.error as error:
     elif error.errno == errno.ETIMEDOUT:
         print("Connection timed out")
 print("sent")
+        
+#run as a server to receiv the message from server
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as  s:
+    s.bind((HOST, PORT))
+    s.listen()
+    conn, addr = s.accept()
+    with conn:
+        #print(f"Connected by {addr}")
+        data = conn.recv(1024)
+        print("message received: " + data.decode())
+s.close()
 input()#so window dosnt close 
