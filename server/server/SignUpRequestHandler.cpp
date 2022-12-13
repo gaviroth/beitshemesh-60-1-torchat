@@ -1,9 +1,11 @@
-#include "SignUpRequestHandler.h"
 #include "mongoInclude.h"
 #include "MongoDatabase.h"
-#include <iostream>
 
-void signup(buffer bf, buffer port) {
+#include <iostream>
+#include "SignUpRequestHandler.h"
+#include "sendMsgToClientHandler.h"
+
+void signup(buffer bf, int port) {
 	struct SignupRequest
 	{
 		std::string email;
@@ -30,19 +32,23 @@ void signup(buffer bf, buffer port) {
 			if (std::regex_match(finalData.email, emailCheck))
 			{
 				addNewUser(finalData.username, finalData.password, finalData.email); // sign up to the db
-				std::cout << "user signed up successfully \n";
+				//std::cout << "user signed up successfully \n";
+				sendMsgToClient("user signed up successfully", port);
 			}
 			else {
-				std::cout << "email is not valid \n";
+				//std::cout << "email is not valid \n";
+				sendMsgToClient("email is not valid", port);
 			}
 		}   
 		else{
 
-			std::cout << "password is not valid \n";
+			//std::cout << "password is not valid \n";
+			sendMsgToClient("password is not valid", port);
 		}
 	}
 	else {
 
-		std::cout << "Username already taken \n";
+		//std::cout << "Username already taken \n";
+		sendMsgToClient("Username already taken", port);
 	}
 }
