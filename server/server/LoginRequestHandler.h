@@ -1,3 +1,3 @@
 #pragma once
 #include "buffer.h"
-void login(buffer bf, buffer port);
+void login(buffer bf, int port);
