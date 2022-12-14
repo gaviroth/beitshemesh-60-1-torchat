@@ -1,13 +1,15 @@
 #pragma comment(lib, "ws2_32.lib")
-#include <iostream>
+
 #include <thread>
 #include <vector>
-#include "WSAInitializer.h"
-#include <stdlib.h>     /* srand, rand */
 #include <time.h> 
+#include <iostream>
+#include <stdlib.h>/* srand, rand */
+#include "WSAInitializer.h"
+
+
 #define PORT 2345
-static const char* port[5]={"1235", "1236", "1237", "1238", "1239"};
-static const char server[4] = {'1','2', '3', '4'};
+static const char* port[5]={"1235", "1236", "1237", "1238", "1239"};//the ports of the middle servers
 SOCKET bindAndListen()
 {
 	struct sockaddr_in sa = { 0 };
@@ -39,26 +41,28 @@ void handleNewClient(SOCKET a)
 	while (r1==r3||r2==r3 )
 	{
 		r3 = rand() % 4 + 0;
-	}
+	}//r1,r2 and r3 are thrre diffrent random numbers betwwen 0 to 4;
 	if (m[0] == 's')
 	{
 		std::string qw=port[r1];
 		std::string qw1 = port[r2];
 		std::string qw2 = port[r3];
 		std::string q = qw+qw1+qw2;
+		std::cout << q;
 		send(a, q.c_str(), strlen(q.c_str()), 0);
 
-	}
+	}// making a mmesage that will include a path in case that the server asks for a path and than he wiil need to add his target in the end
 	else
 	{
 		std::string qw = port[r1];
 		std::string qw1 = port[r2];
 		std::string qw2 = port[r3];
-		std::string qw3 = server;
+		std::string qw3 = "1234";//the server port....
 
 		std::string q = qw3+qw + qw1 + qw2;
+		std::cout << q; 
 		send(a, q.c_str(), strlen(q.c_str()), 0);
-	}
+	}// making a mmesage that will include a path in case that the client asks for a path and the server is the last target....
 
 
 	closesocket(a);
@@ -85,7 +89,7 @@ void startHandleRequests()
 
 	}
 }
-int bro()
+int router()
 {
 
 	// create new thread for handling message
@@ -107,6 +111,6 @@ int bro()
 int main()
 {
 	WSAInitializer wsaInit;
-	bro();
+	router();
 	return 0;
 }

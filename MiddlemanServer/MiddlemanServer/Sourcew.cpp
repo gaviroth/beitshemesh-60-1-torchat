@@ -1,11 +1,14 @@
  // ConsoleApplication3.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+#pragma warning(disable:4996) // for inet_addr(got a error)
 #include <WinSock2.h>
 #include <Windows.h>
 #include "Sourcew.h"
+
+SOCKET cv;
 SOCKET _serverSocket;
-#define PORT 1235
-void serve()
+std::string serverIP = "127.0.0.1";
+
+void serve(int PORT)
 {
 	// this server use TCP. that why SOCK_STREAM & IPPROTO_TCP
 	// if the server use UDP we will use: SOCK_DGRAM & IPPROTO_UDP
@@ -65,29 +68,46 @@ void acceptClient()
 }
 void handleNewClient(SOCKET a)
 {
+	std::cout << "in handleNewClient \n";
 	char m[1024];
-	recv(a, m, strlen(m), 0);
-	int x = (int(m[2]) - 48) * 1000 + (int(m[3]) - 48) * 100 + (int(m[4]) - 48) * 10 + (int(m[5]) - 48);
-	int xy = x % 100 - 4;
-	int co = (int(m[x - 4]) - 48) * 1000 + (int(m[x - 3]) - 48) * 100 + (int(m[x - 2]) - 48) * 10 + (int(m[x - 1]) - 48);
+	recv(a, m, strlen(m), 0);//Takes a message from whoever send it to him and the goal is to get off the last port that is in this message and to change the length because of the change that has been done in the message
+	std::cout << m << "\n";
+	int  message_len = (int(m[1]) - 48) * 1000 + (int(m[2]) - 48) * 100 + (int(m[3]) - 48) * 10 + (int(m[4]) - 48);
+	std::cout << m << "\n";
+	int xy = message_len % 100 - 4;//Takes the two last numbers in the length and minus four because we delte the last port
+	int the_port = (int(m[message_len + 1]) - 48) * 1000 + (int(m[message_len  + 2]) - 48) * 100 + (int(m[message_len + 3]) - 48) * 10 + (int(m[message_len + 4]) - 48);
+	std::cout << the_port << "\n";
+
+	cv = socket(AF_INET, SOCK_STREAM, 0);
+
+	if (cv == INVALID_SOCKET)
+		throw std::exception(__FUNCTION__ " - socket");
+
 	struct sockaddr_in sa = { 0 };
-	sa.sin_port = htons(co);
+	sa.sin_port = htons(the_port);
 	sa.sin_family = AF_INET;
-	sa.sin_addr.s_addr = 0;
-	SOCKET cv = socket(AF_INET, SOCK_STREAM, 0);
+	sa.sin_addr.s_addr = inet_addr(serverIP.c_str());
+
+	int status = connect(cv, (struct sockaddr*)&sa, sizeof(sa));
+
+	if (status == INVALID_SOCKET)
+		throw std::exception("Cant connect to client");
+
+	std::cout << "connected to: " << the_port << "\n";
+
 	char answer[1024];
 	for (auto it = 0; it < 1024; it++)
 	{
 		answer[it] = m[it];
 	}
-	answer[x - 4] = 0;
-	answer[x - 3] = 0;
-	answer[x - 2] = 0;
-	answer[x - 1] = 0;
-	answer[4] = xy / 10;
-	answer[5] = xy % 10;
+	answer[message_len + 1] = 0;//aditing the message...
+	answer[message_len + 2] = 0;
+	answer[message_len + 3] = 0;
+	answer[message_len + 4] = 0;
+
+	answer[3] = (xy / 10 + 48);
+	answer[4] = (xy % 10 + 48);
 	send(cv, answer, strlen(answer), 0);
+	std::cout << "sent to: " << the_port << "\n";
 	closesocket(cv);
-
-
 }

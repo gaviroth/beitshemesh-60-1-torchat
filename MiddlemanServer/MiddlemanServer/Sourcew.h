@@ -6,5 +6,5 @@
 #include <vector>
 #include "WSAInitializer.h"
 void acceptClient();
-void serve();
+void serve(int PORT);
 void handleNewClient(SOCKET a);

@@ -32,7 +32,7 @@ void signup(buffer bf, int port) {
 			if (std::regex_match(finalData.email, emailCheck))
 			{
 				addNewUser(finalData.username, finalData.password, finalData.email); // sign up to the db
-				//std::cout << "user signed up successfully \n";
+				std::cout << "user signed up successfully \n";
 				sendMsgToClient("user signed up successfully", port);
 			}
 			else {
