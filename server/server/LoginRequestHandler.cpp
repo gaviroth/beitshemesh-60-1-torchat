@@ -1,9 +1,11 @@
-#include "LoginRequestHandler.h"
 #include "mongoInclude.h"
 #include "MongoDatabase.h"
-#include <iostream>
 
-void login(buffer bf, buffer port) {
+#include <iostream>
+#include "LoginRequestHandler.h"
+#include "sendMsgToClientHandler.h"
+
+void login(buffer bf, int port) {
 	struct LoginRequest
 	{
 		std::string username;
@@ -20,13 +22,16 @@ void login(buffer bf, buffer port) {
 	{
 		if (doesPasswordMatch(finalData.username, finalData.password)) 
 		{
-			std::cout << "user loged in successfully \n";
+			//std::cout << "user loged in successfully \n";
+			sendMsgToClient("user loged in successfully", port);
 		}
 		else {
-			std::cout << "password dosnt match \n";
+			//std::cout << "password dosnt match \n";
+			sendMsgToClient("password dosnt match", port);
 		}
 	}
 	else {
-		std::cout << "user dosnt exists \n";
+		//std::cout << "user dosnt exists \n";
+		sendMsgToClient("user dosnt exists", port);
 	}
 }

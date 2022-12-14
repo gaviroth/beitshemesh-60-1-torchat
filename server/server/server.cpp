@@ -1,6 +1,7 @@
 #include "Server.h"
 #include "LoginRequestHandler.h"
 #include "SignUpRequestHandler.h"
+#include "sendMsgToClientHandler.h"
 
 SOCKET _serverSocket;
 
@@ -69,8 +70,9 @@ void clientHandler(SOCKET clientSocket)
 	try
 	{
 		buffer bf;
-		buffer port;
+		buffer portV;
 		int temp = 0;
+		int port = 0;
 		bool flag = true;
 		char* data = new char[BUFFER_SIZE + MAX_BUFFER_SIZE];
 		int msg = recv(clientSocket, data, BUFFER_SIZE + MAX_BUFFER_SIZE, 0);
@@ -132,12 +134,15 @@ void clientHandler(SOCKET clientSocket)
 
 		for (size_t i = temp; i < (dataLen - tempCSize) && flag; i++)//puts json into buffer(bf)
 		{
-			if (temp + 10 < i ) {
+			if (temp + 2 < i ) {
 				flag = false;
 			}
-			port.push_back(static_cast<unsigned char>(data[i]));
+			portV.push_back(static_cast<unsigned char>(data[i]));
 
 		}
+		std::string portString(portV.begin(), portV.end());
+		port = stoi(portString);
+		//std::cout << port << "\n";
 
 		switch (msgCode) {
 		case 111://SIGN UP
@@ -156,6 +161,7 @@ void clientHandler(SOCKET clientSocket)
 			signup(bf, port);
 		}
 		closesocket(clientSocket);
+		
 	}
 	catch (const std::exception& e)
 	{
