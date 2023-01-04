@@ -6,6 +6,7 @@
 #include "buffer.h"
 #include "Server.h"
 #include "WSAInitializer.h"
+#include "sendMsgToClientHandler.h"
 
 int main()
 {
@@ -13,7 +14,6 @@ int main()
     {
         mongocxx::instance instance{};
         creat();//mongodb
-        //addNewUser("username", "password", "email");
 
         WSAInitializer wsaInit;
         serve(1234);

@@ -23,15 +23,15 @@ void login(buffer bf, int port) {
 		if (doesPasswordMatch(finalData.username, finalData.password)) 
 		{
 			//std::cout << "user loged in successfully \n";
-			sendMsgToClient("user loged in successfully", port);
+			sendMsgToClient("user loged in successfully", port, CLIENT_LOG_IN_RESPONSE);
 		}
 		else {
 			//std::cout << "password dosnt match \n";
-			sendMsgToClient("password dosnt match", port);
+			sendMsgToClient("password dosnt match", port, CLIENT_ERROR);
 		}
 	}
 	else {
 		//std::cout << "user dosnt exists \n";
-		sendMsgToClient("user dosnt exists", port);
+		sendMsgToClient("user dosnt exists", port, CLIENT_ERROR);
 	}
 }

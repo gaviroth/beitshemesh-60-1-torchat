@@ -33,22 +33,22 @@ void signup(buffer bf, int port) {
 			{
 				addNewUser(finalData.username, finalData.password, finalData.email); // sign up to the db
 				std::cout << "user signed up successfully \n";
-				sendMsgToClient("user signed up successfully", port);
+				sendMsgToClient("user signed up successfully", port, CLIENT_SIGN_UP_RESPONSE);
 			}
 			else {
 				//std::cout << "email is not valid \n";
-				sendMsgToClient("email is not valid", port);
+				sendMsgToClient("email is not valid", port , CLIENT_ERROR);
 			}
 		}   
 		else{
 
 			//std::cout << "password is not valid \n";
-			sendMsgToClient("password is not valid", port);
+			sendMsgToClient("password is not valid", port, CLIENT_ERROR);
 		}
 	}
 	else {
 
 		//std::cout << "Username already taken \n";
-		sendMsgToClient("Username already taken", port);
+		sendMsgToClient("Username already taken", port, CLIENT_ERROR);
 	}
 }
