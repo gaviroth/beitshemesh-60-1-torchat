@@ -1,9 +1,9 @@
- // ConsoleApplication3.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// ConsoleApplication3.cpp : This file contains the 'main' function. Program execution begins and ends there.
 #pragma warning(disable:4996) // for inet_addr(got a error)
 #include <WinSock2.h>
 #include <Windows.h>
 #include "Sourcew.h"
-
+#include <string>
 SOCKET cv;
 SOCKET _serverSocket;
 std::string serverIP = "127.0.0.1";
@@ -66,6 +66,24 @@ void acceptClient()
 	clientHandlerThread.detach();
 
 }
+long long int decrypt(int encrpyted_text)
+{
+	int d = private_key;
+	long long int decrypted = 1;
+	while (d--) {
+		decrypted *= encrpyted_text;
+		decrypted %= n;
+	}
+	return decrypted;
+}
+std::string decoder(std::vector<int> encoded)
+{
+	std::string s;
+	// calling the decrypting function decoding function
+	for (auto& num : encoded)
+		s += decrypt(num);
+	return s;
+}
 void handleNewClient(SOCKET a)
 {
 	std::cout << "in handleNewClient \n";
@@ -74,8 +92,17 @@ void handleNewClient(SOCKET a)
 	std::cout << m << "\n";
 	int  message_len = (int(m[1]) - 48) * 1000 + (int(m[2]) - 48) * 100 + (int(m[3]) - 48) * 10 + (int(m[4]) - 48);
 	std::cout << m << "\n";
+	std::vector<int> hector = {0};
+	for (int i = 0; i < message_len; i++)
+	{
+		hector.push_back(int(m[i + 5]) - 48);
+	}
+	std::string new_msg = decoder(hector);
 	int xy = message_len % 100 - 4;//Takes the two last numbers in the length and minus four because we delte the last port
-	int the_port = (int(m[message_len + 1]) - 48) * 1000 + (int(m[message_len  + 2]) - 48) * 100 + (int(m[message_len + 3]) - 48) * 10 + (int(m[message_len + 4]) - 48);
+	int ms_l = new_msg.length();
+
+	int the_port = (int(new_msg[ms_l - 1]) - 48) * 1000 + (int(new_msg[ms_l - 2]) - 48) * 100 + (int(new_msg[ms_l + 3]) - 48) * 10 + (int(new_msg[ms_l - 4]) - 48);
+	
 	std::cout << the_port << "\n";
 
 	cv = socket(AF_INET, SOCK_STREAM, 0);
@@ -95,19 +122,16 @@ void handleNewClient(SOCKET a)
 
 	std::cout << "connected to: " << the_port << "\n";
 
-	char answer[1024];
-	for (auto it = 0; it < 1024; it++)
-	{
-		answer[it] = m[it];
-	}
-	answer[message_len + 1] = 0;//aditing the message...
-	answer[message_len + 2] = 0;
-	answer[message_len + 3] = 0;
-	answer[message_len + 4] = 0;
-
-	answer[3] = (xy / 10 + 48);
-	answer[4] = (xy % 10 + 48);
-	send(cv, answer, strlen(answer), 0);
+	
+	std::string leng = std::to_string(ms_l);
+	if (leng.length() == 2)
+		leng = "00" + leng;
+	if (leng.length() == 3)
+		leng = "0" + leng;
+	std::string an = std::string(1, m[0]) + leng + new_msg;
+	
+	
+	send(cv, an.c_str(), strlen(an.c_str()), 0);
 	std::cout << "sent to: " << the_port << "\n";
 	closesocket(cv);
 }
