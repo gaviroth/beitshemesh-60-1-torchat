@@ -93,9 +93,19 @@ void handleNewClient(SOCKET a)
 	int  message_len = (int(m[1]) - 48) * 1000 + (int(m[2]) - 48) * 100 + (int(m[3]) - 48) * 10 + (int(m[4]) - 48);
 	std::cout << m << "\n";
 	std::vector<int> hector = {0};
-	for (int i = 0; i < message_len; i++)
+	int minw=0;
+	for (int i = 5; i < message_len; i++)
 	{
-		hector.push_back(int(m[i + 5]) - 48);
+			if (m[i] == ',')
+		{
+			hector.push_back(minw);
+			minw = 0;
+		}
+		else
+		{
+			minw = minw * 10;
+			minw = minw + int(m[i]) - 48;
+		}
 	}
 	std::string new_msg = decoder(hector);
 	int xy = message_len % 100 - 4;//Takes the two last numbers in the length and minus four because we delte the last port
