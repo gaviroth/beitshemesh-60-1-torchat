@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
             throw std::exception("Cant connect to client");
         
 		int num = (int(argv[1][0]) - 48) * 1000 + (int(argv[1][1]) - 48) * 100 + (int(argv[1][2]) - 48) * 10 + (int(argv[1][3]) - 48);
-        std::string ans = "pk" + std::to_string(num) + std::to_string(public_key);
+        std::string ans = "pk" + std::to_string(num) + std::to_string(public_key)+std::to_string(n);
         send(cv, ans.c_str(), strlen(ans.c_str()), 0);
 
 		serve(num);
