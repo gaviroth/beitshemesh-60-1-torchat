@@ -38,7 +38,7 @@ void handleNewClient(SOCKET a)
 	{
 		std::string port1 = "1234";
 		std::string spk1 = std::to_string(m[3]) +m[3]+ m[4] + m[5] + m[6] + m[7] + m[8];
-		spk1 = m[3] + m[4] + m[5] + m[6] + m[7] + m[8];
+		spk1 = m[3] + m[4] + m[5] + m[6] + m[7] + m[8]+m[9]+m[10];
 		ms_ports.insert({ port1,spk1 });
 	}
 	if (m[0] == 'p' && m[1] == 'k')
@@ -46,7 +46,7 @@ void handleNewClient(SOCKET a)
 		std::string  port1 = std::to_string(m[3]) + m[3] + m[4] + m[5] + m[6] + m[7] + m[8];
 		port1 = m[2] + m[3] + m[4] + m[5];
 		std::string spk1 = std::to_string(m[3]) + m[3] + m[4] + m[5] + m[6] + m[7] + m[8];
-		spk1 = m[3] + m[4] + m[5] + m[6] + m[7] + m[8];
+		spk1 = m[3] + m[4] + m[5] + m[6] + m[7] + m[8]+m[9]+m[10];
 		ms_ports.insert({ port1,spk1 });
 
 	}
