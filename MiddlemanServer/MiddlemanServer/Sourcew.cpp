@@ -101,7 +101,7 @@ void handleNewClient(SOCKET a)
 	int xy = message_len % 100 - 4;//Takes the two last numbers in the length and minus four because we delte the last port
 	int ms_l = new_msg.length();
 
-	int the_port = (int(new_msg[ms_l - 1]) - 48) * 1000 + (int(new_msg[ms_l - 2]) - 48) * 100 + (int(new_msg[ms_l + 3]) - 48) * 10 + (int(new_msg[ms_l - 4]) - 48);
+	int the_port = (int(new_msg[ms_l - 1]) - 48) * 1000 + (int(new_msg[ms_l - 2]) - 48) * 100 + (int(new_msg[ms_l - 3]) - 48) * 10 + (int(new_msg[ms_l - 4]) - 48);
 	
 	std::cout << the_port << "\n";
 
