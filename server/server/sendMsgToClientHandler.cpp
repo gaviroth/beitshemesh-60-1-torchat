@@ -1,7 +1,7 @@
 #include "sendMsgToClientHandler.h"
 #pragma warning(disable:4996) // for inet_addr(got a error)
 
-
+extern std::set<int> mySet;
 SOCKET _clientSocket;
 SOCKET _routerSocket;
 std::string serverIP = "127.0.0.1";

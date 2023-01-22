@@ -2,10 +2,13 @@
 #include "MongoDatabase.h"
 
 #include <iostream>
+#include "tokenHandler.h" 
 #include "LoginRequestHandler.h"
 #include "sendMsgToClientHandler.h"
 
 void login(buffer bf, int port) {
+	int token = 0; 
+	std::string Stoken = " ";
 	struct LoginRequest
 	{
 		std::string username;
@@ -23,7 +26,9 @@ void login(buffer bf, int port) {
 		if (doesPasswordMatch(finalData.username, finalData.password)) 
 		{
 			//std::cout << "user loged in successfully \n";
-			sendMsgToClient("user loged in successfully", port, CLIENT_LOG_IN_RESPONSE);
+			token = generateToken(finalData.username);
+			Stoken = std::to_string(token);
+			sendMsgToClient(Stoken + "user loged in successfully", port, CLIENT_LOG_IN_RESPONSE);
 		}
 		else {
 			//std::cout << "password dosnt match \n";

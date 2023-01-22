@@ -144,6 +144,7 @@
     <ClCompile Include="sendMsgToClientHandler.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="SignUpRequestHandler.cpp" />
+    <ClCompile Include="tokenHandler.cpp" />
     <ClCompile Include="torServer.cpp" />
     <ClCompile Include="WSAInitializer.cpp" />
   </ItemGroup>
@@ -156,6 +157,7 @@
     <ClInclude Include="sendMsgToClientHandler.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SignUpRequestHandler.h" />
+    <ClInclude Include="tokenHandler.h" />
     <ClInclude Include="WSAInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

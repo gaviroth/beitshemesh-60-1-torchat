@@ -2,10 +2,13 @@
 #include "MongoDatabase.h"
 
 #include <iostream>
+#include "tokenHandler.h" 
 #include "SignUpRequestHandler.h"
 #include "sendMsgToClientHandler.h"
 
 void signup(buffer bf, int port) {
+	int token = 0;
+	std::string Stoken = " ";
 	struct SignupRequest
 	{
 		std::string email;
@@ -33,7 +36,9 @@ void signup(buffer bf, int port) {
 			{
 				addNewUser(finalData.username, finalData.password, finalData.email); // sign up to the db
 				std::cout << "user signed up successfully \n";
-				sendMsgToClient("user signed up successfully", port, CLIENT_SIGN_UP_RESPONSE);
+				token = generateToken(finalData.username);
+				Stoken = std::to_string(token);
+				sendMsgToClient(Stoken + "user signed up successfully", port, CLIENT_SIGN_UP_RESPONSE);
 			}
 			else {
 				//std::cout << "email is not valid \n";

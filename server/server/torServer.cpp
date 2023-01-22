@@ -3,10 +3,14 @@
 #include "mongoInclude.h"
 #include "MongoDatabase.h"
 
+#include <set>
 #include "buffer.h"
 #include "Server.h"
+#include "tokenHandler.h" 
 #include "WSAInitializer.h"
 #include "sendMsgToClientHandler.h"
+
+std::set<int> mySet;
 
 int main()
 {
