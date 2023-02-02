@@ -1,10 +1,14 @@
 ﻿#include "Encryption.h"
+#include <WinSock2.h>
+#include <Windows.h>
+#include "buffer.h"
 
-using namespace std;
-set<int> prime; // a set will be the collection of prime numbers, where we can select random primes p and q
-int public_key;
-int private_key;
-int n;
+#pragma warning(disable:4996) // for inet_addr(got a error)
+
+extern int n;
+extern int public_key;
+extern int private_key;
+extern std::set<int> prime; // a set will be the collection of prime numbers, where we can select random primes p and q
 
 int gcd(int a, int h)
 {
@@ -25,7 +29,7 @@ void primefiller()
 
     // method used to fill the primes set is seive of
     // eratothenes(a method to collect prime numbers)
-    vector<bool> seive(250, true);
+    std::vector<bool> seive(250, true);
     seive[0] = false;
     seive[1] = false;
     for (int i = 2; i < 250; i++) {
@@ -100,38 +104,80 @@ long long int decrypt(int encrpyted_text)
 // first converting each character to its ASCII value and
 // then encoding it then decoding the number to get the
 // ASCII and converting it to character
-vector<int> encoder(string message)
+std::vector<int> encoder(std::string message)
 {
-    vector<int> form;
+    std::vector<int> form;
     // calling the encrypting function in encoding function
     for (auto& letter : message)
         form.push_back(encrypt((int)letter));
     return form;
 }
-string decoder(vector<int> encoded)
+std::string decoder(std::vector<int> encoded)
 {
-    string s;
+    std::string s;
     // calling the decrypting function decoding function
     for (auto& num : encoded)
         s += decrypt(num);
     return s;
 }
+/*
 int main()
 {
     primefiller();
     setkeys();
-    string message = "Test Message";
+    std::string message = "Test Message";
     // uncomment below for manual input
     // cout<<"enter the message\n";getline(cin,message);
     // calling the encoding function
-    vector<int> coded = encoder(message);
-    cout << "\n" << public_key << "\n\n" << n << "\n\n" << private_key << "\n";
-    cout << "Initial message:\n" << message;
-    cout << "\n\nThe encoded message(encrypted by public key)\n";
+    std::vector<int> coded = encoder(message);
+    std::cout << "\n" << public_key << "\n\n" << n << "\n\n" << private_key << "\n";
+    std::cout << "Initial message:\n" << message;
+    std::cout << "\n\nThe encoded message(encrypted by public key)\n";
     for (auto& p : coded)
-        cout << p << "\n";
-    cout << "\n\nThe decoded message(decrypted by private "
+        std::cout << p << "\n";
+    std::cout << "\n\nThe decoded message(decrypted by private "
         "key)\n";
-    cout << decoder(coded) << endl;
+    std::cout << decoder(coded) << std::endl;
     return 0;
+}*/
+
+void sendKeysToRouter()
+{
+    SOCKET _routerSocket;
+    std::string serverIP = "127.0.0.1";
+
+    std::string ns = "";
+    std::string msg = "";
+    std::string spkns = "";
+
+    ns = std::to_string(n);
+    spkns = std::to_string(public_key);
+
+    while (ns.size() != 6)
+        ns = "0" + ns;
+    while (spkns.size() != 2)
+        spkns = "0" + spkns;
+
+    msg = "spk" + spkns + ns;
+
+    // we connect to client that uses TCP. thats why SOCK_STREAM & IPPROTO_TCP
+    _routerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (_routerSocket == INVALID_SOCKET)
+        throw std::exception(__FUNCTION__ " - socket");   
+
+    struct sockaddr_in sa = { 0 };
+    sa.sin_port = htons(2345); // port that server will listen to
+    sa.sin_family = AF_INET;   // must be AF_INET
+    sa.sin_addr.s_addr = inet_addr(serverIP.c_str());
+
+    // the process will not continue until the server accepts the client
+    int status = connect(_routerSocket, (struct sockaddr*)&sa, sizeof(sa));
+
+    if (status == INVALID_SOCKET)
+        throw std::exception("Cant connect to client");
+
+    send(_routerSocket, msg.c_str(), msg.size(), 0);  // last parameter: flag. for us will be 0. 
+
+    closesocket(_routerSocket);
 }

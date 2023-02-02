@@ -2,11 +2,12 @@
 #pragma warning(disable:4996) // for inet_addr(got a error)
 
 extern std::set<int> mySet;
-SOCKET _clientSocket;
-SOCKET _routerSocket;
-std::string serverIP = "127.0.0.1";
 
 std::string getRout() {
+
+	SOCKET _routerSocket;
+	std::string serverIP = "127.0.0.1";
+
 	char ports[12];
 	std::string msg = "s";
 	std::string sports = "";
@@ -89,6 +90,10 @@ buffer putMsgTougther(std::string msg, int statusCode) {
 }
 
 void sendMsgToClient(std::string msg, int port, int statusCode) {
+
+	SOCKET _clientSocket;
+	std::string serverIP = "127.0.0.1";
+
 	buffer ans;
 	char temp = ' ';
 	int mdlserverPort = 0; 

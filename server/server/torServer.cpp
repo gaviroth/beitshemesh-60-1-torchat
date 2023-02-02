@@ -6,20 +6,30 @@
 #include <set>
 #include "buffer.h"
 #include "Server.h"
+#include "Encryption.h"
 #include "tokenHandler.h" 
 #include "WSAInitializer.h"
 #include "sendMsgToClientHandler.h"
 
+int n;
+int public_key;
+int private_key;
 std::set<int> mySet;
+std::set<int> prime;
 
 int main()
 {
     try
     {
+        WSAInitializer wsaInit;
+
+        primefiller();//fill primes for encryption
+        setkeys();//set keys for encryption
+        sendKeysToRouter();
+
         mongocxx::instance instance{};
         creat();//mongodb
 
-        WSAInitializer wsaInit;
         serve(1234);
     }
     catch (std::exception &e)

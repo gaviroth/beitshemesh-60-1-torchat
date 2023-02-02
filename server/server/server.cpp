@@ -1,4 +1,5 @@
 #include "Server.h"
+#include "Encryption.h"
 #include "LoginRequestHandler.h"
 #include "SignUpRequestHandler.h"
 #include "sendMsgToClientHandler.h"
@@ -69,21 +70,24 @@ void clientHandler(SOCKET clientSocket)
 {
 	try
 	{
+		int i = 0;
 		buffer bf;
 		buffer portV;
 		int temp = 0;
 		int port = 0;
 		bool flag = true;
+		std::string decodedmsg = "";
+		std::vector<int> encodedmsg = { 0 };
 		char* data = new char[BUFFER_SIZE + MAX_BUFFER_SIZE];
 		int msg = recv(clientSocket, data, BUFFER_SIZE + MAX_BUFFER_SIZE, 0);
 
-		char* tempC = nullptr;
+		//char* tempC = nullptr;
 		unsigned int  dataLen = 0;
-		unsigned int  tempCSize = 0;
+		//unsigned int  tempCSize = 0;
 
 		unsigned int msgCode = static_cast<unsigned int>(data[0]);
 
-		for (int i = 1; i <= sizeof(unsigned int) + BUFFER_SIZE && flag; i++)//loop checks if part of the json is sent in datalen and if so it stores the json data inside tempC
+		/*for (int i = 1; i <= sizeof(unsigned int) + BUFFER_SIZE && flag; i++)//loop checks if part of the json is sent in datalen and if so it stores the json data inside tempC
 		{
 			if (data[i] == '{')
 			{
@@ -103,11 +107,15 @@ void clientHandler(SOCKET clientSocket)
 			{
 				dataLen += static_cast<unsigned int>(data[i]);
 			}
+		}*/
+
+		//data = new char[dataLen - tempCSize];//rests data so you can receive json
+
+		for (i = 1; i < 5; i++) {
+			dataLen += static_cast<unsigned int>(data[i]);
 		}
 
-		data = new char[dataLen - tempCSize];//rests data so you can receive json
-
-		msg = recv(clientSocket, data, dataLen - tempCSize, 0);//receive the rest of thr message
+		msg = recv(clientSocket, data, dataLen, 0);//receive the rest of thr message
 		if (msg == INVALID_SOCKET)
 		{
 			std::string str = "Error while recieving message from socket: ";
@@ -115,34 +123,50 @@ void clientHandler(SOCKET clientSocket)
 			throw std::exception(str.c_str());
 		}
 
-		flag = true;
-		if (tempC != nullptr)//checks if datalen took part of the json
+		for (int i = 5; i <= dataLen; i++)
 		{
-			bf = buffer(tempC, tempC + tempCSize);
+			if (data[i] != ',')
+			{
+				encodedmsg.push_back(data[i]);
+			}
 		}
 
-		for (size_t i = 0; i < (dataLen - tempCSize) && flag; i++)//puts json into buffer(bf)
+		decodedmsg = decoder(encodedmsg);
+		const char* dataDecodedmsg = decodedmsg.c_str();
+
+		flag = true;
+		/*if (tempC != nullptr)//checks if datalen took part of the json
 		{
-			if (data[i] == '}') {
+			bf = buffer(tempC, tempC + tempCSize);
+		}*/
+
+		for (size_t i = 0; i < (dataLen) && flag; i++)//puts json into buffer(bf)
+		{
+			if (dataDecodedmsg[i] == '}') {
 				flag = false;
 			}
-			bf.push_back(static_cast<unsigned char>(data[i]));
+			bf.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
 			temp = i + 1;
 
 		}
+
 		flag = true;
 
-		for (size_t i = temp; i < (dataLen - tempCSize) && flag; i++)//puts json into buffer(bf)
+		for (size_t i = temp; i < (dataLen) && flag; i++)//takes port
 		{
 			if (temp + 2 < i ) {
 				flag = false;
 			}
-			portV.push_back(static_cast<unsigned char>(data[i]));
+			portV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
 
 		}
 		std::string portString(portV.begin(), portV.end());
 		port = stoi(portString);
 		//std::cout << port << "\n";
+	
+		// need to take n and public key 
+
+
 
 		switch (msgCode) {
 		case 111://SIGN UP

@@ -28,14 +28,6 @@ int randomToken()
 	num4 = (rand() % 9) + 1;
 	num5 = (rand() % 9) + 1;
 	num6 = (rand() % 9) + 1;
-	/*
-	num1 = 7;
-	num2 = 8;
-	num3 = 6;
-	num4 = 9;
-	num5 = 3;
-	num6 = 2;
-	*/
 
 	token = num1 * 100000;
 	token += num2 * 10000;

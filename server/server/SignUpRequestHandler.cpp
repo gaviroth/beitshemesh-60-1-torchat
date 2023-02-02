@@ -41,19 +41,19 @@ void signup(buffer bf, int port) {
 				sendMsgToClient(Stoken + "user signed up successfully", port, CLIENT_SIGN_UP_RESPONSE);
 			}
 			else {
-				//std::cout << "email is not valid \n";
+				std::cout << "email is not valid \n";
 				sendMsgToClient("email is not valid", port , CLIENT_ERROR);
 			}
 		}   
 		else{
 
-			//std::cout << "password is not valid \n";
+			std::cout << "password is not valid \n";
 			sendMsgToClient("password is not valid", port, CLIENT_ERROR);
 		}
 	}
 	else {
 
-		//std::cout << "Username already taken \n";
+		std::cout << "Username already taken \n";
 		sendMsgToClient("Username already taken", port, CLIENT_ERROR);
 	}
 }
