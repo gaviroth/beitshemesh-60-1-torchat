@@ -15,7 +15,7 @@ mail = "username@mail.com"
 status_code = 0 # 112 - Login , 111 - Sign Up
 
 def login_format_str(username , password):
-    json_str = '{"username":"' + username + '","password":"' + password + '"}6789'
+    json_str = '{"username":"' + username + '","password":"' + password + '"}678932123456'
     temp = len(json_str)+ 12
     msgLen = str(temp)
     if temp < 1000:
@@ -27,7 +27,7 @@ def login_format_str(username , password):
     string = str(CLIENT_LOGIN) + msgLen + json_str
     return string
 def signup_format_str(username , password , mail):
-    json_str = '{"Username":"' + username + '","Password":"' + password + '","Email":"' + mail + '"}6789'
+    json_str = '{"Username":"' + username + '","Password":"' + password + '","Email":"' + mail + '"}678932123456'
     temp = len(json_str)+ 12
     msgLen = str(temp)
     if temp < 1000:

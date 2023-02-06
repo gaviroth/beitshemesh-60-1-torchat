@@ -22,8 +22,7 @@ int gcd(int a, int h)
     }
 }
 
-// we will run the function only once to fill the set of
-// prime numbers
+// we will run the function only once to fill the globel set of prime numbers
 void primefiller()
 {
 
@@ -42,6 +41,7 @@ void primefiller()
             prime.insert(i);
     }
 }
+
 // picking a random prime number and erasing that prime
 // number from list because p!=q
 int pickrandomprime()
@@ -56,7 +56,8 @@ int pickrandomprime()
     prime.erase(it);
     return ret;
 }
-void setkeys()
+
+void setkeys()//sets keys
 {
     int prime1 = pickrandomprime(); // first prime number
     int prime2 = pickrandomprime(); // second prime number
@@ -79,6 +80,7 @@ void setkeys()
     }
     private_key = d;
 }
+
 // to encrypt the given number
 long long int encrypt(double message)
 {
@@ -90,6 +92,7 @@ long long int encrypt(double message)
     }
     return encrpyted_text;
 }
+
 // to decrypt the given number
 long long int decrypt(int encrpyted_text)
 {
@@ -101,6 +104,7 @@ long long int decrypt(int encrpyted_text)
     }
     return decrypted;
 }
+
 // first converting each character to its ASCII value and
 // then encoding it then decoding the number to get the
 // ASCII and converting it to character
@@ -112,6 +116,7 @@ std::vector<int> encoder(std::string message)
         form.push_back(encrypt((int)letter));
     return form;
 }
+
 std::string decoder(std::vector<int> encoded)
 {
     std::string s;
@@ -120,26 +125,6 @@ std::string decoder(std::vector<int> encoded)
         s += decrypt(num);
     return s;
 }
-/*
-int main()
-{
-    primefiller();
-    setkeys();
-    std::string message = "Test Message";
-    // uncomment below for manual input
-    // cout<<"enter the message\n";getline(cin,message);
-    // calling the encoding function
-    std::vector<int> coded = encoder(message);
-    std::cout << "\n" << public_key << "\n\n" << n << "\n\n" << private_key << "\n";
-    std::cout << "Initial message:\n" << message;
-    std::cout << "\n\nThe encoded message(encrypted by public key)\n";
-    for (auto& p : coded)
-        std::cout << p << "\n";
-    std::cout << "\n\nThe decoded message(decrypted by private "
-        "key)\n";
-    std::cout << decoder(coded) << std::endl;
-    return 0;
-}*/
 
 void sendKeysToRouter()
 {
