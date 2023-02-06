@@ -107,6 +107,7 @@ void handleNewClient(SOCKET a)
 			minw = minw + int(m[i]) - 48;
 		}
 	}
+	hector.push_back(minw);
 	std::string new_msg = decoder(hector);
 	int xy = message_len % 100 - 4;//Takes the two last numbers in the length and minus four because we delte the last port
 	int ms_l = new_msg.length();
