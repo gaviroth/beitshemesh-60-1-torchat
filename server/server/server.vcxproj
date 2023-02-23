@@ -139,23 +139,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Encryption.cpp" />
     <ClCompile Include="LoginRequestHandler.cpp" />
     <ClCompile Include="MongoDatabase.cpp" />
+    <ClCompile Include="msgHandler.cpp" />
     <ClCompile Include="sendMsgToClientHandler.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="SignUpRequestHandler.cpp" />
+    <ClCompile Include="tokenHandler.cpp" />
     <ClCompile Include="torServer.cpp" />
     <ClCompile Include="WSAInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.h" />
+    <ClInclude Include="Encryption.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="LoginRequestHandler.h" />
     <ClInclude Include="MongoDatabase.h" />
     <ClInclude Include="mongoInclude.h" />
+    <ClInclude Include="msgHandler.h" />
     <ClInclude Include="sendMsgToClientHandler.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SignUpRequestHandler.h" />
+    <ClInclude Include="tokenHandler.h" />
     <ClInclude Include="WSAInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

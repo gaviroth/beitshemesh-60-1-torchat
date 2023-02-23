@@ -1,4 +1,5 @@
 #include "Server.h"
+#include "Encryption.h"
 #include "LoginRequestHandler.h"
 #include "SignUpRequestHandler.h"
 #include "sendMsgToClientHandler.h"
@@ -69,96 +70,130 @@ void clientHandler(SOCKET clientSocket)
 {
 	try
 	{
+		int i = 0;
 		buffer bf;
 		buffer portV;
+		buffer clientsNV;
+		buffer clientsPublicKeyV;
 		int temp = 0;
 		int port = 0;
+		int Ctemp = 0;
 		bool flag = true;
+		int clientsN = 0;
+		int clientsPublicKey = 0;
+		unsigned int dataLen = 0;
+		std::string decodedmsg = "";
+		std::vector<int> encodedmsg = { 0 };
 		char* data = new char[BUFFER_SIZE + MAX_BUFFER_SIZE];
 		int msg = recv(clientSocket, data, BUFFER_SIZE + MAX_BUFFER_SIZE, 0);
 
-		char* tempC = nullptr;
-		unsigned int  dataLen = 0;
-		unsigned int  tempCSize = 0;
+		unsigned int msgCode = static_cast<unsigned int>(data[0]);//byte 0 is msg code
 
-		unsigned int msgCode = static_cast<unsigned int>(data[0]);
+		dataLen = (int(data[1]) - 48) * 1000 + (int(data[2]) - 48) * 100 + (int(data[3]) - 48) * 10 + (int(data[4]) - 48);//take 1-4 byts and turn them from char to int to have the data lenght
 
-		for (int i = 1; i <= sizeof(unsigned int) + BUFFER_SIZE && flag; i++)//loop checks if part of the json is sent in datalen and if so it stores the json data inside tempC
-		{
-			if (data[i] == '{')
-			{
-				if (i != sizeof(unsigned int) + BUFFER_SIZE)
-				{
-					tempC = new char[(sizeof(unsigned int) + BUFFER_SIZE) - i];
-					for (int j = i; j < sizeof(unsigned int) + BUFFER_SIZE; j++)
-					{
-						tempC[tempCSize] = data[j];
-						tempCSize++;
-					}
-				}
-				flag = false;
-			}
+		data = new char[dataLen];//rests data so you can receive json
 
-			else
-			{
-				dataLen += static_cast<unsigned int>(data[i]);
-			}
-		}
-
-		data = new char[dataLen - tempCSize];//rests data so you can receive json
-
-		msg = recv(clientSocket, data, dataLen - tempCSize, 0);//receive the rest of thr message
-		if (msg == INVALID_SOCKET)
+		msg = recv(clientSocket, data, dataLen, 0);//receive the rest of thr message
+		if (msg == INVALID_SOCKET)//check to make sure msg is valid
 		{
 			std::string str = "Error while recieving message from socket: ";
 			str += std::to_string(clientSocket);
 			throw std::exception(str.c_str());
 		}
 
-		flag = true;
-		if (tempC != nullptr)//checks if datalen took part of the json
+		for (int i = 0; i <= dataLen; i++)// loop puts msg in vector so you can decod msg
 		{
-			bf = buffer(tempC, tempC + tempCSize);
+			if (data[i] == ',')// if char is , push last number into vector
+			{
+				
+				encodedmsg.push_back(Ctemp);
+				Ctemp = 0;
+			}
+			else 
+			{
+				Ctemp = Ctemp * 10;// if number has multple digits 
+				Ctemp = Ctemp + (int(data[i]) - 48); // turn char to int and add to number if it has multple digits 
+			}
 		}
 
-		for (size_t i = 0; i < (dataLen - tempCSize) && flag; i++)//puts json into buffer(bf)
+		decodedmsg = decoder(encodedmsg);// decode msg 
+		const char* dataDecodedmsg = decodedmsg.c_str();// turn msg str to char*
+
+		//loop puts json into buffer(bf)
+		for (int i = 0; i < dataLen && flag; i++)
 		{
 			if (data[i] == '}') {
 				flag = false;
 			}
-			bf.push_back(static_cast<unsigned char>(data[i]));
+			bf.push_back(static_cast<unsigned char>(dataDecodedmsg[i])); 
 			temp = i + 1;
 
 		}
-		flag = true;
 
-		for (size_t i = temp; i < (dataLen - tempCSize) && flag; i++)//puts json into buffer(bf)
+		if (msgCode == CLIENT_SIGN_UP || msgCode == CLIENT_LOG_IN) //if msg is sign up or log in take port public key and n 
 		{
-			if (temp + 2 < i ) {
-				flag = false;
+		    flag = true;//reset flag
+			//loop takes clients port
+			for (int i = temp; i < dataLen && flag; i++)// i = temp because we need the next chars after the json
+			{
+				if (temp + 2 < i) // less then 2 so the loop will run 4 times because a port is 4 digits 
+				{
+						flag = false;
+				}
+				portV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
+
 			}
-			portV.push_back(static_cast<unsigned char>(data[i]));
+			std::string portString(portV.begin(), portV.end());
+			port = stoi(portString);
+			//std::cout << port << "\n";
 
+			flag = true;//reset flag
+			//loop takes clients public key
+			for (int i = temp + 4; i < dataLen && flag; i++)// temp + 4 because a port is 4 digits and we neet the next 2 
+			{
+				if (temp + 4 < i) // less then 4 because the port is 4 digits, so it will run 2 times because the clients Public Key is 2 digits
+				{
+					flag = false;
+				}
+				clientsPublicKeyV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
+
+			}
+			std::string clientsPublicKeyString(clientsPublicKeyV.begin(), clientsPublicKeyV.end());
+			clientsPublicKey = stoi(clientsPublicKeyString);
+			//std::cout << clientsPublicKey << "\n";
+
+			flag = true;//reset flag
+			//loop takes clients n
+			for (int i = temp + 6; i < dataLen && flag; i++)//temp + 6 because a port is 4 digits and the clients Public Key is 2 digits and we need the next 6
+			{
+				if (temp + 10 < i) // less then 10 because the port is 4 digits and the clients Public Key is 2 digits, so it will run 6 times because the clients n is 6 digits
+				{
+					flag = false;
+				}
+				clientsNV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
+
+			}
+			std::string clientsNString(clientsNV.begin(), clientsNV.end());
+			clientsN = stoi(clientsNString);
+			//std::cout << clientsN << "\n";
 		}
-		std::string portString(portV.begin(), portV.end());
-		port = stoi(portString);
-		//std::cout << port << "\n";
 
-		switch (msgCode) {
+		switch (msgCode) // send msg to the relevant handler based on msg code 
+		{
 		case 111://SIGN UP
-			signup(bf, port);
+			signup(bf, port, clientsPublicKey, clientsN);
 			break;
 		case 112://LOG IN
-			login(bf, port);
+			login(bf, port, clientsPublicKey, clientsN);
 			break;
-		case 113:
-			signup(bf, port);
+		case 113://MSG
+			signup(bf, port, clientsPublicKey, clientsN);
 			break;
 		case 114:
-			signup(bf, port);
+			signup(bf, port, clientsPublicKey, clientsN);
 			break;
 		default:
-			signup(bf, port);
+			signup(bf, port, clientsPublicKey, clientsN);
 		}
 		closesocket(clientSocket);
 		
