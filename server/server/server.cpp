@@ -79,6 +79,8 @@ void clientHandler(SOCKET clientSocket)
 		int port = 0;
 		int Ctemp = 0;
 		bool flag = true;
+		int clientsN = 0;
+		int clientsPublicKey = 0;
 		unsigned int dataLen = 0;
 		std::string decodedmsg = "";
 		std::vector<int> encodedmsg = { 0 };
@@ -123,72 +125,75 @@ void clientHandler(SOCKET clientSocket)
 			if (data[i] == '}') {
 				flag = false;
 			}
-			bf.push_back(static_cast<unsigned char>(data[i]));// dataDecodedmsg[i]
+			bf.push_back(static_cast<unsigned char>(dataDecodedmsg[i])); 
 			temp = i + 1;
 
 		}
 
-		flag = true;//reset flag
-		//loop takes clients port
-		for (int i = temp; i < dataLen && flag; i++)// i = temp because we need the next chars after the json
+		if (msgCode == CLIENT_SIGN_UP || msgCode == CLIENT_LOG_IN) //if msg is sign up or log in take port public key and n 
 		{
-			if (temp + 2 < i ) // less then 2 so the loop will run 4 times because a port is 4 digits 
+		    flag = true;//reset flag
+			//loop takes clients port
+			for (int i = temp; i < dataLen && flag; i++)// i = temp because we need the next chars after the json
 			{
-				flag = false;
+				if (temp + 2 < i) // less then 2 so the loop will run 4 times because a port is 4 digits 
+				{
+						flag = false;
+				}
+				portV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
+
 			}
-			portV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
+			std::string portString(portV.begin(), portV.end());
+			port = stoi(portString);
+			//std::cout << port << "\n";
 
-		}
-		std::string portString(portV.begin(), portV.end());
-		port = stoi(portString);
-		//std::cout << port << "\n";
-
-		flag = true;//reset flag
-		//loop takes clients public key
-		for (int i = temp + 4; i < dataLen && flag; i++)// temp + 4 because a port is 4 digits and we neet the next 2 
-		{
-			if (temp + 4 < i) // less then 4 because the port is 4 digits, so it will run 2 times because the clients Public Key is 2 digits
-			{		
-				flag = false;
-			}
-			clientsPublicKeyV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
-
-		}
-		std::string clientsPublicKeyString(clientsPublicKeyV.begin(), clientsPublicKeyV.end());
-		int clientsPublicKey = stoi(clientsPublicKeyString);
-		//std::cout << clientsPublicKey << "\n";
-
-		flag = true;//reset flag
-		//loop takes clients n
-		for (int i = temp + 6; i < dataLen && flag; i++)//temp + 6 because a port is 4 digits and the clients Public Key is 2 digits and we need the next 6
-		{
-			if (temp + 10 < i) // less then 10 because the port is 4 digits and the clients Public Key is 2 digits, so it will run 6 times because the clients n is 6 digits
+			flag = true;//reset flag
+			//loop takes clients public key
+			for (int i = temp + 4; i < dataLen && flag; i++)// temp + 4 because a port is 4 digits and we neet the next 2 
 			{
-				flag = false;
-			}
-			clientsNV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
+				if (temp + 4 < i) // less then 4 because the port is 4 digits, so it will run 2 times because the clients Public Key is 2 digits
+				{
+					flag = false;
+				}
+				clientsPublicKeyV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
 
+			}
+			std::string clientsPublicKeyString(clientsPublicKeyV.begin(), clientsPublicKeyV.end());
+			clientsPublicKey = stoi(clientsPublicKeyString);
+			//std::cout << clientsPublicKey << "\n";
+
+			flag = true;//reset flag
+			//loop takes clients n
+			for (int i = temp + 6; i < dataLen && flag; i++)//temp + 6 because a port is 4 digits and the clients Public Key is 2 digits and we need the next 6
+			{
+				if (temp + 10 < i) // less then 10 because the port is 4 digits and the clients Public Key is 2 digits, so it will run 6 times because the clients n is 6 digits
+				{
+					flag = false;
+				}
+				clientsNV.push_back(static_cast<unsigned char>(dataDecodedmsg[i]));
+
+			}
+			std::string clientsNString(clientsNV.begin(), clientsNV.end());
+			clientsN = stoi(clientsNString);
+			//std::cout << clientsN << "\n";
 		}
-		std::string clientsNString(clientsNV.begin(), clientsNV.end());
-		int clientsN = stoi(clientsNString);
-		//std::cout << clientsN << "\n";
 
 		switch (msgCode) // send msg to the relevant handler based on msg code 
 		{
 		case 111://SIGN UP
-			signup(bf, port);
+			signup(bf, port, clientsPublicKey, clientsN);
 			break;
 		case 112://LOG IN
-			login(bf, port);
+			login(bf, port, clientsPublicKey, clientsN);
 			break;
-		case 113:
-			signup(bf, port);
+		case 113://MSG
+			signup(bf, port, clientsPublicKey, clientsN);
 			break;
 		case 114:
-			signup(bf, port);
+			signup(bf, port, clientsPublicKey, clientsN);
 			break;
 		default:
-			signup(bf, port);
+			signup(bf, port, clientsPublicKey, clientsN);
 		}
 		closesocket(clientSocket);
 		

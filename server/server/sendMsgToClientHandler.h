@@ -6,4 +6,4 @@
 std::string getRout();// gets rout from router
 buffer strToBuffer(std::string str);//turns string into buffer 
 buffer putMsgTougther(std::string msg, int statusCode);// puts msg togther by protocol
-void sendMsgToClient(std::string msg, int port, int statusCode);// handells sending msg to client
+void sendMsgToClient(std::string msg, int port, int clientsPublicKey, int clientsN, int msgCode);// handells sending msg to client

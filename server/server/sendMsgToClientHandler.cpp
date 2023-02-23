@@ -89,7 +89,7 @@ buffer putMsgTougther(std::string msg, int statusCode) {
 	return ans;
 }
 
-void sendMsgToClient(std::string msg, int port, int statusCode) {
+void sendMsgToClient(std::string msg, int port, int clientsPublicKey, int clientsN, int msgCode) {
 
 	SOCKET _clientSocket;
 	std::string serverIP = "127.0.0.1";
@@ -123,7 +123,7 @@ void sendMsgToClient(std::string msg, int port, int statusCode) {
 	mdlserverPort = mdlserverPort + ((int(temp) - 48) * 1000);
 
 	msg = msg + ports;
-	ans = putMsgTougther(msg, statusCode);
+	ans = putMsgTougther(msg, msgCode);
 
 	std::string strans(ans.begin(), ans.end());//turn to str to send to client (only turned to buffer to put msg togther)
 

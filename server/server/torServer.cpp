@@ -4,6 +4,7 @@
 #include "MongoDatabase.h"
 
 #include <set>
+#include <mutex>
 #include "buffer.h"
 #include "Server.h"
 #include "Encryption.h"
@@ -14,8 +15,13 @@
 int n;
 int public_key;
 int private_key;
+std::mutex setMtx;
+std::mutex mongoMtx;
 std::set<int> mySet;
 std::set<int> prime;
+mongocxx::client cli;
+mongocxx::database db;
+mongocxx::uri uri{ "mongodb://localhost:27017" };
 
 int main()
 {

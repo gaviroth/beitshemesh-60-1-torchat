@@ -6,7 +6,7 @@
 #include "LoginRequestHandler.h"
 #include "sendMsgToClientHandler.h"
 
-void login(buffer bf, int port) {
+void login(buffer bf, int port, int clientsPublicKey, int clientsN) {
 	int token = 0; 
 	std::string Stoken = " ";
 	struct LoginRequest
@@ -25,18 +25,20 @@ void login(buffer bf, int port) {
 	{
 		if (doesPasswordMatch(finalData.username, finalData.password)) 
 		{
-			std::cout << "user loged in successfully \n";
-			token = generateToken(finalData.username);
+
+			token = generateToken();
+			updateUsersInfo(finalData.username, port, clientsPublicKey, clientsN, token);
 			Stoken = std::to_string(token);
-			sendMsgToClient(Stoken + "user loged in successfully", port, CLIENT_LOG_IN_RESPONSE);
+			sendMsgToClient("user loged in successfully" + Stoken, port, clientsPublicKey, clientsN, CLIENT_LOG_IN_RESPONSE);
+			std::cout << "user loged in successfully \n";
 		}
 		else {
 			std::cout << "password dosnt match \n";
-			sendMsgToClient("password dosnt match", port, CLIENT_ERROR);
+			sendMsgToClient("password dosnt match", port, clientsPublicKey, clientsN, CLIENT_LOG_IN_RESPONSE);
 		}
 	}
 	else {
 		std::cout << "user dosnt exists \n";
-		sendMsgToClient("user dosnt exists", port, CLIENT_ERROR);
+		sendMsgToClient("user dosnt exists", port, clientsPublicKey, clientsN, CLIENT_LOG_IN_RESPONSE);
 	}
 }

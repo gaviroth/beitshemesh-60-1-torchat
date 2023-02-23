@@ -6,7 +6,7 @@
 #include <string>
 #include <cstdlib>
 
-
+extern std::mutex setMtx;
 extern std::set<int> mySet;
 
 // function returns a random 6 digit token 
@@ -43,27 +43,38 @@ int randomToken()
 not taken by another user and saves it to Mongo dB 
 (because the next request will be to a different thread) 
 and saves to the set so you can make sure token isn't taken*/
-int generateToken(std::string userName)
+int generateToken()
 {
 	int token = 0;
 	std::set<int>::iterator it;
 
+	setMtx.lock();
 	do {
 		token = randomToken();
 		it = mySet.find(token);
 	} while (it != mySet.end());
 
-	updateToken(token,userName);
-
 	mySet.insert(token);
+	setMtx.unlock();
 
 	return token;
 }
 
-bool isTokenValid(std::string userName, int token) {
-	return true;
+bool isTokenValid(std::string username, int token) 
+{
+	if (!isUserInactiveForHalfHour(username))
+	{
+		if (isUserActive(username))
+		{
+			if (doesTokenMatch(token, username)) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
-void eraseTokenFromSet(int token) {
-
+void eraseTokenFromSet(int token)
+{
+	mySet.erase(token);
 }
