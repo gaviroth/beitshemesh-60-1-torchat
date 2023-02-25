@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -137,50 +137,34 @@ namespace WpfApp1
             return msg;
         }
         static void GetPrimesInRange()
-        //this function returns a list of all prime numbers between 1 and the given number
-        {
-            int num = 250;
-            primes.Add(2);
-            for (int i = 1; i <= num; i = i + 2)
-            {
-                if (DetermineIsPrime(i) == true && i > 1)
-                {
-                    primes.Add(i);
-                    //Console.WriteLine(primes.Count);
-                }
-            }
-        }
-
-        static bool DetermineIsPrime(int num)
-        //this function evaluates a single number and returns whether or not it is prime
         {
 
-            int y;
-            List<int> divisors = new List<int>();
-            double x = Math.Sqrt(num);
-            y = (int)Math.Ceiling(x);
-            if (num == 3 || num == 2)
+            for (int i = 2; i <= 250; i++)
             {
-                return true;
-            }
-            for (int counter = 1; counter <= y + 1; counter++)
-            {
-                if (num % counter == 0)
+                bool isPrime = true;
+
+                // check if i is divisible by any number between 2 and i - 1
+                for (int j = 2; j < i; j++)
                 {
-                    divisors.Add(counter);
-                    if (divisors.Count > 1)
+                    if (i % j == 0)
                     {
-                        return false;
+                        isPrime = false;
+                        break;
                     }
                 }
+
+                if (isPrime)
+                {
+                    primes.Add(i);
+                }
             }
-            return true;
+
         }
         static int pickrandomprime()
         {
             Random rand = new Random();
             int i = primes.Count();
-            int number = rand.Next(0, i);
+            int number = rand.Next(i);
             int num = primes[number];
             primes.Remove(number);
             return num;
@@ -248,7 +232,7 @@ namespace WpfApp1
         }
         static string Login(int port, string username, string password)
         {
-            string json_str = "{'username':'" + username + "','password':'" + password + "}" + port + my_public_key + my_num;
+            string json_str = "{'username':'" + username + "','password':'" + password + "}" + port + my_public_key.ToString() + my_num.ToString();
             string to_send = Get_Ready(Rout(port), json_str);
             string send_to_port = to_send.Substring(to_send.Length - 4, to_send.Length);
             to_send = to_send.Substring(0, to_send.Length - 4);
@@ -267,7 +251,7 @@ namespace WpfApp1
         }
         static string signup(int port, string username, string password, string mail)
         {
-            string json_str = "{'username':'" + username + "','password':'" + password + "','Email':'" + mail + "}" + port + my_public_key + my_num;
+            string json_str = "{'username':'" + username + "','password':'" + password + "','Email':'" + mail + "}" + port + my_public_key.ToString() + my_num.ToString();
             string to_send = Get_Ready(Rout(port), json_str);
             string send_to_port = to_send.Substring(to_send.Length - 4, to_send.Length);
             to_send = to_send.Substring(0, to_send.Length - 4);
@@ -293,6 +277,8 @@ namespace WpfApp1
         {
             InitializeComponent();
             PORT = 2365;
+            GetPrimesInRange();
+            setkeys();
         }
         private void OnLoginButtonClick(object sender, RoutedEventArgs e)
         {
@@ -316,3 +302,4 @@ namespace WpfApp1
         }
     }
 }
+
