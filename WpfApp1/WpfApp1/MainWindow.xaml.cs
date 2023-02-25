@@ -54,7 +54,6 @@ namespace WpfApp1
             IDictionary<string, string> routing = new Dictionary<string, string>();
 
             string str = Encoding.Default.GetString(buffer);
-
             routing.Add(str.Substring(0, 4), str.Substring(4, 8));
             routing.Add(str.Substring(12, 4), str.Substring(16, 8));
             routing.Add(str.Substring(24, 4), str.Substring(28, 8));
@@ -267,7 +266,7 @@ namespace WpfApp1
         }
         static string signup(int port, string username, string password, string mail)
         {
-            string json_str = "{'username':'" + username + "','password':'" + password + "','Email':'" + mail + "}" + port + my_public_key + my_num;
+            string json_str = "{'Username':'" + username + "','Password':'" + password + "','Email':'" + mail + "}" + port + my_public_key + my_num;
             string to_send = Get_Ready(Rout(port), json_str);
             string send_to_port = to_send.Substring(to_send.Length - 4, to_send.Length);
             to_send = to_send.Substring(0, to_send.Length - 4);

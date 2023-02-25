@@ -6,7 +6,14 @@
 #include <set>
 #include <string>
 #include<numeric>
+#pragma warning(disable:4996) // for inet_addr(got a error)
 std::string serverIP = "127.0.0.1";
+
+std::set<int> prime; // a set will be the collection of prime numbers,
+       // where we can select random primes p and q
+int public_key;
+int private_key;
+int n;
 
 int gcd(int a, int h)
 {
@@ -19,11 +26,7 @@ int gcd(int a, int h)
         h = temp;
     }
 }
-std::set<int> prime; // a set will be the collection of prime numbers,
-       // where we can select random primes p and q
-int public_key;
-int private_key;
-int n;
+
 // we will run the function only once to fill the set of
 // prime numbers
 void primefiller()
@@ -47,6 +50,7 @@ void primefiller()
 // number from list because p!=q
 int pickrandomprime()
 {
+    std::srand(std::time(nullptr));
     int k = rand() % prime.size();
     auto it = prime.begin();
     while (k--)
@@ -100,9 +104,12 @@ int main(int argc, char* argv[])
 
         int status = connect(cv, (struct sockaddr*)&sa, sizeof(sa));
 
-        if (status == INVALID_SOCKET)
+        if (status == INVALID_SOCKET){
+            int errorCode = WSAGetLastError();
+            std::cout << "socket() failed with error: " << errorCode << std::endl;
             throw std::exception("Cant connect to client");
-        
+        }
+
 		int num = (int(argv[1][0]) - 48) * 1000 + (int(argv[1][1]) - 48) * 100 + (int(argv[1][2]) - 48) * 10 + (int(argv[1][3]) - 48);
         std::string sn = std::to_string(n);
         std::string pkn = std::to_string(public_key);
@@ -110,8 +117,8 @@ int main(int argc, char* argv[])
             sn = "0" + sn;
         while (pkn.size() != 2)
             pkn = "0" + pkn;
-        std::string ans = "pk" + std::to_string(num) + std::to_string(public_key)+std::to_string(n);
-        send(cv, ans.c_str(), strlen(ans.c_str()), 0);
+        std::string ans = "pk" + std::to_string(num) + pkn + sn;
+        send(cv, ans.c_str(), ans.size(), 0);
 
 		serve(num);
 	}

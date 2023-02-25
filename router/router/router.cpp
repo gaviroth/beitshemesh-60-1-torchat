@@ -12,8 +12,9 @@
 #include <string>
 #define PORT 2345
 
-static std::map<std::string /*port*/,std::string /*public key*/> ms_ports;
-static std::string spk;
+ std::map<std::string /*port*/,std::string /*public key*/> ms_ports;
+ std::string spk;
+
 SOCKET bindAndListen()
 {
 	struct sockaddr_in sa = { 0 };
@@ -37,16 +38,17 @@ void handleNewClient(SOCKET a)
 	if (m[0] == 's'&&m[1]=='p' && m[2] == 'k')
 	{
 		std::string port1 = "1234";
-		std::string spk1 = std::to_string(m[3]) +m[3]+ m[4] + m[5] + m[6] + m[7] + m[8];
-		spk1 = m[3] + m[4] + m[5] + m[6] + m[7] + m[8] + m[9] + m[10];
-		ms_ports.insert({ port1,spk1 });
+		std::string spk1 = std::string(m).substr(3, 8);
+		
+		spk = spk1;
 	}
 	if (m[0] == 'p' && m[1] == 'k')
 	{
-		std::string  port1 = std::to_string(m[3]) + m[3] + m[4] + m[5] + m[6] + m[7] + m[8];
-		port1 = m[2] + m[3] + m[4] + m[5];
-		std::string spk1 = std::to_string(m[3]) + m[3] + m[4] + m[5] + m[6] + m[7] + m[8];
-		spk1 = m[6] + m[7] + m[8] + m[9] + m[10] + m[11] + m[12] + m[13];
+		std::string  port1 = std::string(m).substr(2, 4);
+		
+		std::string spk1 = std::string(m).substr(6, 8);
+		
+		std::cout << port1 << spk1;
 		ms_ports.insert({ port1,spk1 });
 
 	}
@@ -112,7 +114,6 @@ void handleNewClient(SOCKET a)
 				if (it->second.length() == 5)
 					it->second == "0" + it->second;
 				if (i == r1)
-					
 					qw = it->first+it->second ;
 				if (i == r2)
 					qw1 = it->first+it->second;
@@ -123,7 +124,7 @@ void handleNewClient(SOCKET a)
 			std::string qw3 = "1234"+spk;//the server port....
 
 			std::string q = qw3 + qw + qw1 + qw2;
-			std::cout << q;
+			std::cout <<"\n \n \n msg: "<< q << "\n \n \n";
 			send(a, q.c_str(), strlen(q.c_str()), 0);
 		}// making a mmesage that will include a path in case that the client asks for a path and the server is the last target....
 

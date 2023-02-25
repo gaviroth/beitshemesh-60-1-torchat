@@ -3,10 +3,18 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include "Sourcew.h"
+#include <set>
 #include <string>
+
 SOCKET cv;
 SOCKET _serverSocket;
-std::string serverIP = "127.0.0.1";
+extern std::string serverIP;
+
+extern std::set<int> prime; // a set will be the collection of prime numbers,
+	   // where we can select random primes p and q
+extern int public_key;
+extern int private_key;
+extern int n;
 
 void serve(int PORT)
 {
