@@ -19,6 +19,8 @@ using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
 using System.Windows;
+using System.Data.SQLite;
+
 namespace WpfApp1
 {
     /// <summary>
@@ -31,7 +33,52 @@ namespace WpfApp1
         static int my_num;
         static int my_public_key;
         static int PORT;
+        static SQLiteConnection CreateConnection()
+        {
 
+            SQLiteConnection sqlite_conn;
+            // Create a new database connection:
+            sqlite_conn = new SQLiteConnection("Data Source=database.db; Version = 3; New = True; Compress = True; ");
+            // Open the connection:
+            try
+            {
+                sqlite_conn.Open();
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return sqlite_conn;
+        }
+        static void CreateTable(SQLiteConnection conn)
+        {
+
+            SQLiteCommand sqlite_cmd;
+            string createTableSql = "CREATE TABLE Messages (Id INTEGER PRIMARY KEY, Username TEXT, Message TEXT, IsSentByUser INTEGER, Timestamp DATETIME)";
+            sqlite_cmd = conn.CreateCommand();
+            
+            sqlite_cmd.CommandText = createTableSql;
+            sqlite_cmd.ExecuteNonQuery();
+
+        }
+        static void InsertData(SQLiteConnection conn, string username, string message, bool IsSentByUser, DateTime timestamp)
+        {
+            SQLiteCommand sqlite_cmd;
+            sqlite_cmd = conn.CreateCommand();
+            string insertSql = "INSERT INTO Messages(Username, Message, IsSentByUser, Timestamp) VALUES(@Username, @Message, @IsSentByUser, @Timestamp)";
+            using (SQLiteCommand command = new SQLiteCommand(insertSql, conn))
+            {
+                command.Parameters.AddWithValue("@Username", username);
+                command.Parameters.AddWithValue("@Message", message);
+                command.Parameters.AddWithValue("@IsSentByUser", IsSentByUser);
+                command.Parameters.AddWithValue("@Timestamp", timestamp);
+
+                command.ExecuteNonQuery();
+            }
+
+
+
+        }
         public static IDictionary<string, string> Rout(int port)
         {
             TcpClient client = new TcpClient();
@@ -121,8 +168,8 @@ namespace WpfApp1
             int bup = 0;
             foreach (var i in guide)
             {
-                int pk = i.Value[0] - 48 * 10 + i.Value[1] - 48;
-                int n = i.Value[2] - 48 * 100000 + i.Value[3] - 48 * 10000 + i.Value[4] - 48 * 1000 + i.Value[5] - 48 * 100 + i.Value[6] - 48 * 10 + i.Value[7] - 48;
+                int pk = (i.Value[0] - 48) * 10 + i.Value[1] - 48;
+                int n = (i.Value[2] - 48) * 100000 + (i.Value[3] - 48) * 10000 + (i.Value[4] - 48) * 1000 + (i.Value[5] - 48) * 100 + (i.Value[6] - 48) * 10 + i.Value[7] - 48;
                 IList<int> mimi = new List<int>();
                 mimi = Encoder(msg, pk, n);
                 if (bup == 0)
@@ -234,14 +281,22 @@ namespace WpfApp1
         {
             string json_str = "{'username':'" + username + "','password':'" + password + "}" + port + my_public_key.ToString() + my_num.ToString();
             string to_send = Get_Ready(Rout(port), json_str);
-            string send_to_port = to_send.Substring(to_send.Length - 4, to_send.Length);
+            string send_to_port = to_send.Substring(to_send.Length - 4, 4);
             to_send = to_send.Substring(0, to_send.Length - 4);
             string leng = to_send.Length.ToString();
             if (to_send.Length < 100)
             {
+                leng = "0000" + leng;
+            }
+            else if (to_send.Length < 1000)
+            {
+                leng = "000" + leng;
+            }
+            else if (to_send.Length < 10000)
+            {
                 leng = "00" + leng;
             }
-            if (to_send.Length < 1000)
+            else if (to_send.Length < 100000)
             {
                 leng = "0" + leng;
             }
@@ -251,9 +306,9 @@ namespace WpfApp1
         }
         static string signup(int port, string username, string password, string mail)
         {
-            string json_str = "{'Username':'" + username + "','Password':'" + password + "','Email':'" + mail + "}" + port + my_public_key.ToString() + my_num.ToString();
+            string json_str = "{'username':'" + username + "','password':'" + password + "','Email':'" + mail + "}" + port + my_public_key.ToString() + my_num.ToString();
             string to_send = Get_Ready(Rout(port), json_str);
-            string send_to_port = to_send.Substring(to_send.Length - 4, to_send.Length);
+            string send_to_port = to_send.Substring(to_send.Length - 4, 4);
             to_send = to_send.Substring(0, to_send.Length - 4);
             string leng = to_send.Length.ToString();
             if (to_send.Length < 100)
@@ -283,7 +338,24 @@ namespace WpfApp1
         private void OnLoginButtonClick(object sender, RoutedEventArgs e)
         {
             string status = Login(PORT, usernameBox.Text, PasswordBox.Text);
-            if(status.Contains("successfully"))
+            IList<int> form = new List<int>();
+            int minw = 0;
+            for (int i = 5; i < status.Length; i++)
+            {
+                if (status[i] == ',')
+                {
+                    form.Add(minw);
+                    minw = 0;
+                }
+                else
+                {
+                    minw = minw * 10;
+                    minw = minw + (status[i]) - 48;
+                }
+            }
+            form.Add(minw);
+            string new_msg = Decoder(form, my_public_key, my_num);
+            if (new_msg.Contains("successfully"))
                 Close();
             else
             {
@@ -293,7 +365,25 @@ namespace WpfApp1
         private void OnSignupButtonClick(object sender, RoutedEventArgs e)
         {
             string status = signup(PORT, SignupUsernameTextBox.Text, SignupPasswordBox.Text, SignupEmailTextBox.Text);
-            if (status.Contains("successfully"))//DONT FORGET TO DECODE THIS
+            IList<int> form = new List<int>();
+            int minw = 0;
+            for (int i = 5; i < status.Length; i++)
+            {
+                if (status[i] == ',')
+                {
+                    form.Add(minw);
+                    minw = 0;
+                }
+                else
+                {
+                    minw = minw * 10;
+                    minw = minw + (status[i]) - 48;
+                }
+            }
+            form.Add(minw);
+            string new_msg = Decoder(form,my_public_key,my_num);
+
+            if (new_msg.Contains("successfully"))//DONT FORGET TO DECODE THIS
                 Close();
             else
             {

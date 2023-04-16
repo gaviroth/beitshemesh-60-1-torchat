@@ -54,7 +54,7 @@ void handleNewClient(SOCKET a)
 	}
 	else
 	{
-		srand(time(NULL));
+		std::srand(std::time(nullptr));
 		int r1 = rand() % ms_ports.size() + 0;
 		int r2 = rand() % ms_ports.size() + 0;
 		int r3 = rand() % ms_ports.size() + 0;

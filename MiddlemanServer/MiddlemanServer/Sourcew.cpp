@@ -74,7 +74,7 @@ void acceptClient()
 	clientHandlerThread.detach();
 
 }
-long long int decrypt(int encrpyted_text)
+long long int decrypt(long long int encrpyted_text)
 {
 	int d = private_key;
 	long long int decrypted = 1;
@@ -84,7 +84,7 @@ long long int decrypt(int encrpyted_text)
 	}
 	return decrypted;
 }
-std::string decoder(std::vector<int> encoded)
+std::string decoder(std::vector<long long int> encoded)
 {
 	std::string s;
 	// calling the decrypting function decoding function
@@ -95,16 +95,16 @@ std::string decoder(std::vector<int> encoded)
 void handleNewClient(SOCKET a)
 {
 	std::cout << "in handleNewClient \n";
-	char m[1024];
+	char m[999998];
 	recv(a, m, strlen(m), 0);//Takes a message from whoever send it to him and the goal is to get off the last port that is in this message and to change the length because of the change that has been done in the message
 	std::cout << m << "\n";
-	int  message_len = (int(m[1]) - 48) * 1000 + (int(m[2]) - 48) * 100 + (int(m[3]) - 48) * 10 + (int(m[4]) - 48);
+	int  message_len = (int(m[1]) - 48) * 100000 + (int(m[2]) - 48) * 10000 + (int(m[3]) - 48) * 1000 + (int(m[4]) - 48 ) * 100 + (int(m[5]) - 48 )* 10 + (int(m[6]) - 48);
 	std::cout << m << "\n";
-	std::vector<int> hector = {0};
-	int minw=0;
-	for (int i = 5; i < message_len; i++)
+	std::vector<long long int> hector = {0};
+	long long int minw=0;
+	for (int i = 7; i < message_len; i++)
 	{
-			if (m[i] == ',')
+		if (m[i] == ',')
 		{
 			hector.push_back(minw);
 			minw = 0;
@@ -112,15 +112,17 @@ void handleNewClient(SOCKET a)
 		else
 		{
 			minw = minw * 10;
-			minw = minw + int(m[i]) - 48;
+			minw = minw + long long int(m[i]) - 48;
 		}
 	}
+	std::cout << "loop" << "\n";
 	hector.push_back(minw);
 	std::string new_msg = decoder(hector);
-	int xy = message_len % 100 - 4;//Takes the two last numbers in the length and minus four because we delte the last port
+	std::cout << "decod" << "\n";
+	//int xy = message_len % 100 - 4;//Takes the two last numbers in the length and minus four because we delte the last port
 	int ms_l = new_msg.length();
-
-	int the_port = (int(new_msg[ms_l - 1]) - 48) * 1000 + (int(new_msg[ms_l - 2]) - 48) * 100 + (int(new_msg[ms_l - 3]) - 48) * 10 + (int(new_msg[ms_l - 4]) - 48);
+	std::cout << new_msg << "\n";
+	int the_port = (int(new_msg[ms_l - 1]) - 48) + (int(new_msg[ms_l - 2]) - 48) * 10 + (int(new_msg[ms_l - 3]) - 48) * 100 + ((int(new_msg[ms_l - 4]) - 48) * 1000);
 	
 	std::cout << the_port << "\n";
 
@@ -144,8 +146,12 @@ void handleNewClient(SOCKET a)
 	
 	std::string leng = std::to_string(ms_l);
 	if (leng.length() == 2)
-		leng = "00" + leng;
+		leng = "0000" + leng;
 	if (leng.length() == 3)
+		leng = "000" + leng;
+	if (leng.length() == 4)
+		leng = "00" + leng;
+	if (leng.length() == 5)
 		leng = "0" + leng;
 	std::string an = std::string(1, m[0]) + leng + new_msg;
 	
