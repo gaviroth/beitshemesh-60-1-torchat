@@ -15,10 +15,12 @@
 int n;
 int public_key;
 int private_key;
-std::mutex setMtx;
+std::mutex idMtx;
+std::mutex tokenMtx;
 std::mutex mongoMtx;
-std::set<int> mySet;
+std::set<int> idSet;
 std::set<int> prime;
+std::set<int> tokenSet;
 mongocxx::client cli;
 mongocxx::database db;
 mongocxx::uri uri{ "mongodb://localhost:27017" };

@@ -6,8 +6,8 @@
 #include <string>
 #include <cstdlib>
 
-extern std::mutex setMtx;
-extern std::set<int> mySet;
+extern std::mutex tokenMtx;
+extern std::set<int> tokenSet;
 
 // function returns a random 6 digit token 
 int randomToken() 
@@ -48,14 +48,14 @@ int generateToken()
 	int token = 0;
 	std::set<int>::iterator it;
 
-	setMtx.lock();
+	tokenMtx.lock();
 	do {
 		token = randomToken();
-		it = mySet.find(token);
-	} while (it != mySet.end());
+		it = tokenSet.find(token);
+	} while (it != tokenSet.end());
 
-	mySet.insert(token);
-	setMtx.unlock();
+	tokenSet.insert(token);
+	tokenMtx.unlock();
 
 	return token;
 }
@@ -76,5 +76,7 @@ bool isTokenValid(std::string username, int token)
 
 void eraseTokenFromSet(int token)
 {
-	mySet.erase(token);
+	tokenMtx.lock();
+	tokenSet.erase(token);
+	tokenMtx.unlock();
 }

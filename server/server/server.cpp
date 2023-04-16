@@ -89,8 +89,8 @@ void clientHandler(SOCKET clientSocket)
 
 		unsigned int msgCode = static_cast<unsigned int>(data[0]);//byte 0 is msg code
 
-		dataLen = (int(data[1]) - 48) * 1000 + (int(data[2]) - 48) * 100 + (int(data[3]) - 48) * 10 + (int(data[4]) - 48);//take 1-4 byts and turn them from char to int to have the data lenght
-
+		dataLen = (int(data[1]) - 48) * 100000 + (int(data[2]) - 48) * 10000 + (int(data[3]) - 48) * 1000 + (int(data[4]) - 48) * 100 + (int(data[5]) - 48) * 10 + (int(data[6]) - 48);//take 1-4 byts and turn them from char to int to have the data lenght
+		
 		data = new char[dataLen];//rests data so you can receive json
 
 		msg = recv(clientSocket, data, dataLen, 0);//receive the rest of thr message

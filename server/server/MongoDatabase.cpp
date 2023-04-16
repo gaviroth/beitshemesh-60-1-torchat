@@ -197,3 +197,28 @@ bool isUserInactiveForHalfHour(std::string userName)
 
 	return isInactive;
 }
+
+void addNewmsg(std::string sendingUser, std::string receivingUser, std::string msg, int msgid)
+{
+	auto now = std::chrono::system_clock::now();
+	auto now_c = std::chrono::system_clock::to_time_t(now);
+
+	mongoMtx.lock();
+	mongocxx::collection usersColl = db["Messages"];
+	usersColl.insert_one(document{}
+		<< "sendingUser" << sendingUser
+		<< "receivingUser" << receivingUser
+		<< "msg" << msg
+		<< "msgid" << msgid
+		<< "time" << std::ctime(&now_c)
+	<< finalize);
+	mongoMtx.unlock();
+}
+
+void deleteMsgById(int msgid)
+{
+	mongoMtx.lock();
+	mongocxx::collection usersColl = db["Messages"];
+	usersColl.delete_one(document{} << "msgid" << msgid << finalize);
+	mongoMtx.unlock();
+}
