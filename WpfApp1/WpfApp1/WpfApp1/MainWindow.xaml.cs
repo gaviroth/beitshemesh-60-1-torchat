@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -163,23 +163,21 @@ namespace WpfApp1
             return s;
         }
 
-        public static string Get_Ready(IDictionary<string, string> guide, string msg)
+         public static string Get_Ready(IDictionary<string, string> guide, string msg)
         {
-            int bup = 0;
             foreach (var i in guide)
             {
                 int pk = (i.Value[0] - 48) * 10 + i.Value[1] - 48;
                 int n = (i.Value[2] - 48) * 100000 + (i.Value[3] - 48) * 10000 + (i.Value[4] - 48) * 1000 + (i.Value[5] - 48) * 100 + (i.Value[6] - 48) * 10 + i.Value[7] - 48;
                 IList<int> mimi = new List<int>();
                 mimi = Encoder(msg, pk, n);
-                if (bup == 0)
-                    msg = null;
+                msg = null;
                 foreach (var a in mimi)
                     msg = msg + a.ToString() + ",";
                 msg = msg.Substring(0, msg.Length - 1);
                 msg = msg + i.Key;
+                
 
-                bup++;
             }
             return msg;
         }
