@@ -94,12 +94,19 @@ std::string decoder(std::vector<long long int> encoded)
 }
 void handleNewClient(SOCKET a)
 {
+	char code = ' ';
 	std::cout << "in handleNewClient \n";
 	char m[999998];
 	recv(a, m, strlen(m), 0);//Takes a message from whoever send it to him and the goal is to get off the last port that is in this message and to change the length because of the change that has been done in the message
 	std::cout << m << "\n";
+	code = m[0];
 	int  message_len = (int(m[1]) - 48) * 100000 + (int(m[2]) - 48) * 10000 + (int(m[3]) - 48) * 1000 + (int(m[4]) - 48 ) * 100 + (int(m[5]) - 48 )* 10 + (int(m[6]) - 48);
+	for (int i = 7; i < message_len; i++)
+	{
+		std::cout << m[i];
+	}
 	std::cout << m << "\n";
+	std::cout << message_len << "\n";
 	std::vector<long long int> hector = {0};
 	long long int minw=0;
 	for (int i = 7; i < message_len; i++)
@@ -154,7 +161,7 @@ void handleNewClient(SOCKET a)
 	if (leng.length() == 5)
 		leng = "0" + leng;
 	std::string an = std::string(1, m[0]) + leng + new_msg;
-	
+	std::cout << "msg" << an << "\n";
 	
 	send(cv, an.c_str(), strlen(an.c_str()), 0);
 	std::cout << "sent to: " << the_port << "\n";

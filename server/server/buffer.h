@@ -1,7 +1,7 @@
 #pragma once
 #define PORT 1234
 #define BUFFER_SIZE 1
-#define MAX_BUFFER_SIZE 4
+#define MAX_BUFFER_SIZE 6
 
 #include <set>
 #include <map>
