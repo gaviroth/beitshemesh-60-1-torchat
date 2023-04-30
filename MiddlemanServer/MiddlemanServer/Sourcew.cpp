@@ -161,7 +161,7 @@ void handleNewClient(SOCKET client_socket)
 		leng = "00" + leng;
 	if (leng.length() == 5)
 		leng = "0" + leng;
-	std::string an = std::string(1, m[0]) + leng + new_msg;
+	std::string an = std::string(1, code[0]) + leng + new_msg;
 	std::cout << "msg" << an << "\n";
 
 	send(cv, an.c_str(), strlen(an.c_str()), 0);
