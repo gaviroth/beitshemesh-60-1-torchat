@@ -70,7 +70,6 @@ void clientHandler(SOCKET clientSocket)
 {
 	try
 	{
-		int i = 0;
 		buffer bf;
 		buffer portV;
 		buffer clientsNV;
@@ -82,6 +81,7 @@ void clientHandler(SOCKET clientSocket)
 		int clientsN = 0;
 		int clientsPublicKey = 0;
 		unsigned int dataLen = 0;
+		int msgLenAfterdecode = 0;
 		std::string decodedmsg = "";
 		std::vector<int> encodedmsg = { 0 };
 		char* data = new char[BUFFER_SIZE + MAX_BUFFER_SIZE];
@@ -117,12 +117,14 @@ void clientHandler(SOCKET clientSocket)
 		}
 
 		decodedmsg = decoder(encodedmsg);// decode msg 
+		std::cout << decodedmsg;
+		msgLenAfterdecode = decodedmsg.length();
 		const char* dataDecodedmsg = decodedmsg.c_str();// turn msg str to char*
 
 		//loop puts json into buffer(bf)
-		for (int i = 0; i < dataLen && flag; i++)
+		for (int i = 0; i < msgLenAfterdecode && flag; i++)
 		{
-			if (data[i] == '}') {
+			if (dataDecodedmsg[i] == '}') {
 				flag = false;
 			}
 			bf.push_back(static_cast<unsigned char>(dataDecodedmsg[i])); 
@@ -134,7 +136,7 @@ void clientHandler(SOCKET clientSocket)
 		{
 		    flag = true;//reset flag
 			//loop takes clients port
-			for (int i = temp; i < dataLen && flag; i++)// i = temp because we need the next chars after the json
+			for (int i = temp; i < msgLenAfterdecode && flag; i++)// i = temp because we need the next chars after the json
 			{
 				if (temp + 2 < i) // less then 2 so the loop will run 4 times because a port is 4 digits 
 				{
@@ -144,12 +146,13 @@ void clientHandler(SOCKET clientSocket)
 
 			}
 			std::string portString(portV.begin(), portV.end());
+			std::cout << portString;
 			port = stoi(portString);
 			//std::cout << port << "\n";
 
 			flag = true;//reset flag
 			//loop takes clients public key
-			for (int i = temp + 4; i < dataLen && flag; i++)// temp + 4 because a port is 4 digits and we neet the next 2 
+			for (int i = temp + 4; i < msgLenAfterdecode && flag; i++)// temp + 4 because a port is 4 digits and we neet the next 2 
 			{
 				if (temp + 4 < i) // less then 4 because the port is 4 digits, so it will run 2 times because the clients Public Key is 2 digits
 				{
@@ -164,7 +167,7 @@ void clientHandler(SOCKET clientSocket)
 
 			flag = true;//reset flag
 			//loop takes clients n
-			for (int i = temp + 6; i < dataLen && flag; i++)//temp + 6 because a port is 4 digits and the clients Public Key is 2 digits and we need the next 6
+			for (int i = temp + 6; i < msgLenAfterdecode && flag; i++)//temp + 6 because a port is 4 digits and the clients Public Key is 2 digits and we need the next 6
 			{
 				if (temp + 10 < i) // less then 10 because the port is 4 digits and the clients Public Key is 2 digits, so it will run 6 times because the clients n is 6 digits
 				{

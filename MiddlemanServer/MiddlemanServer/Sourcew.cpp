@@ -94,13 +94,14 @@ std::string decoder(std::vector<long long int> encoded)
 }
 void handleNewClient(SOCKET client_socket)
 {
-	char code[7];
-	recv(client_socket, code, strlen(code), 0);
+	char* code = new char[7];
+	recv(client_socket, code, 7, 0);
 	int  message_len = (int(code[1]) - 48) * 100000 + (int(code[2]) - 48) * 10000 + (int(code[3]) - 48) * 1000 + (int(code[4]) - 48) * 100 + (int(code[5]) - 48) * 10 + (int(code[6]) - 48);
 
 	std::cout << "in handleNewClient \n";
-	char* m = new char(message_len);
-	recv(client_socket, m, strlen(m), 0);//Takes a message from whoever send it to him and the goal is to get off the last port that is in this message and to change the length because of the change that has been done in the message
+	std::cout << message_len << "\n";
+	char* m = new char[message_len];
+	recv(client_socket, m, message_len, 0);//Takes a message from whoever send it to him and the goal is to get off the last port that is in this message and to change the length because of the change that has been done in the message
 	std::cout << m << "\n";
 	for (int i = 0; i < message_len; i++)
 	{
@@ -126,12 +127,14 @@ void handleNewClient(SOCKET client_socket)
 	std::cout << "loop" << "\n";
 	hector.push_back(minw);
 	std::string new_msg = decoder(hector);
+	new_msg = new_msg.substr(1);
+	std::cout << "nmsg:" << new_msg << "\n";
 	std::cout << "decod" << "\n";
 	//int xy = message_len % 100 - 4;//Takes the two last numbers in the length and minus four because we delte the last port
 	int ms_l = new_msg.length();
 	std::cout << new_msg << "\n";
 	int the_port = (int(new_msg[ms_l - 1]) - 48) + (int(new_msg[ms_l - 2]) - 48) * 10 + (int(new_msg[ms_l - 3]) - 48) * 100 + ((int(new_msg[ms_l - 4]) - 48) * 1000);
-
+	new_msg = new_msg.substr(0, new_msg.length() - 4);
 	std::cout << the_port << "\n";
 
 	cv = socket(AF_INET, SOCK_STREAM, 0);
@@ -151,7 +154,7 @@ void handleNewClient(SOCKET client_socket)
 
 	std::cout << "connected to: " << the_port << "\n";
 
-
+	ms_l = ms_l - 4;
 	std::string leng = std::to_string(ms_l);
 	if (leng.length() == 2)
 		leng = "0000" + leng;
@@ -162,7 +165,8 @@ void handleNewClient(SOCKET client_socket)
 	if (leng.length() == 5)
 		leng = "0" + leng;
 	std::string an = std::string(1, code[0]) + leng + new_msg;
-	std::cout << "msg" << an << "\n";
+	std::cout << "nmsg:" << new_msg << "\n";
+	std::cout << "msg: " << an << "\n";
 
 	send(cv, an.c_str(), strlen(an.c_str()), 0);
 	std::cout << "sent to: " << the_port << "\n";
