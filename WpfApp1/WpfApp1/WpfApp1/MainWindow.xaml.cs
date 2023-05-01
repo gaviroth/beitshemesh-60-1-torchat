@@ -56,7 +56,7 @@ namespace WpfApp1
             SQLiteCommand sqlite_cmd;
             string createTableSql = "CREATE TABLE Messages (Id INTEGER PRIMARY KEY, Username TEXT, Message TEXT, IsSentByUser INTEGER, Timestamp DATETIME)";
             sqlite_cmd = conn.CreateCommand();
-            
+
             sqlite_cmd.CommandText = createTableSql;
             sqlite_cmd.ExecuteNonQuery();
 
@@ -163,7 +163,7 @@ namespace WpfApp1
             return s;
         }
 
-         public static string Get_Ready(IDictionary<string, string> guide, string msg)
+        public static string Get_Ready(IDictionary<string, string> guide, string msg)
         {
             foreach (var i in guide)
             {
@@ -176,7 +176,7 @@ namespace WpfApp1
                     msg = msg + a.ToString() + ",";
                 msg = msg.Substring(0, msg.Length - 1);
                 msg = msg + i.Key;
-                
+
 
             }
             return msg;
@@ -298,7 +298,9 @@ namespace WpfApp1
             {
                 leng = "0" + leng;
             }
-            to_send = "p" + leng + to_send;
+            string lto_send = "p" + leng;
+            sender(Int32.Parse(send_to_port), lto_send);
+
             sender(Int32.Parse(send_to_port), to_send);
             return rec(port);
         }
@@ -311,13 +313,22 @@ namespace WpfApp1
             string leng = to_send.Length.ToString();
             if (to_send.Length < 100)
             {
+                leng = "0000" + leng;
+            }
+            else if (to_send.Length < 1000)
+            {
+                leng = "000" + leng;
+            }
+            else if (to_send.Length < 10000)
+            {
                 leng = "00" + leng;
             }
-            if (to_send.Length < 1000)
+            else if (to_send.Length < 100000)
             {
                 leng = "0" + leng;
             }
-            to_send = "o" + leng + to_send;
+            string lto_send = "p" + leng;
+            sender(Int32.Parse(send_to_port), lto_send);
             sender(Int32.Parse(send_to_port), to_send);
 
             return rec(port);
@@ -357,7 +368,7 @@ namespace WpfApp1
                 Close();
             else
             {
-                ErrorMessageTextBlock.Text= status;
+                ErrorMessageTextBlock.Text = status;
             }
         }
         private void OnSignupButtonClick(object sender, RoutedEventArgs e)
@@ -379,7 +390,7 @@ namespace WpfApp1
                 }
             }
             form.Add(minw);
-            string new_msg = Decoder(form,my_public_key,my_num);
+            string new_msg = Decoder(form, my_public_key, my_num);
 
             if (new_msg.Contains("successfully"))//DONT FORGET TO DECODE THIS
                 Close();
@@ -390,3 +401,4 @@ namespace WpfApp1
         }
     }
 }
+
