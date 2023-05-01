@@ -298,8 +298,7 @@ namespace WpfApp1
             {
                 leng = "0" + leng;
             }
-            string lto_send = "p" + leng;
-            sender(Int32.Parse(send_to_port), lto_send);
+            to_send = "p" + leng + to_send;
 
             sender(Int32.Parse(send_to_port), to_send);
             return rec(port);
@@ -327,8 +326,7 @@ namespace WpfApp1
             {
                 leng = "0" + leng;
             }
-            string lto_send = "p" + leng;
-            sender(Int32.Parse(send_to_port), lto_send);
+            to_send = "o" + leng + to_send;
             sender(Int32.Parse(send_to_port), to_send);
 
             return rec(port);
