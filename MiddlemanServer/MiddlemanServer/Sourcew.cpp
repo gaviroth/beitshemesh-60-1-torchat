@@ -1,4 +1,4 @@
-// ConsoleApplication3.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//// ConsoleApplication3.cpp : This file contains the 'main' function. Program execution begins and ends there.
 #pragma warning(disable:4996) // for inet_addr(got a error)
 #include <WinSock2.h>
 #include <Windows.h>
@@ -92,24 +92,25 @@ std::string decoder(std::vector<long long int> encoded)
 		s += decrypt(num);
 	return s;
 }
-void handleNewClient(SOCKET a)
+void handleNewClient(SOCKET client_socket)
 {
-	char code = ' ';
+	char code[7];
+	recv(client_socket, code, strlen(code), 0);
+	int  message_len = (int(code[1]) - 48) * 100000 + (int(code[2]) - 48) * 10000 + (int(code[3]) - 48) * 1000 + (int(code[4]) - 48) * 100 + (int(code[5]) - 48) * 10 + (int(code[6]) - 48);
+
 	std::cout << "in handleNewClient \n";
-	char m[999998];
-	recv(a, m, strlen(m), 0);//Takes a message from whoever send it to him and the goal is to get off the last port that is in this message and to change the length because of the change that has been done in the message
+	char* m = new char(message_len);
+	recv(client_socket, m, strlen(m), 0);//Takes a message from whoever send it to him and the goal is to get off the last port that is in this message and to change the length because of the change that has been done in the message
 	std::cout << m << "\n";
-	code = m[0];
-	int  message_len = (int(m[1]) - 48) * 100000 + (int(m[2]) - 48) * 10000 + (int(m[3]) - 48) * 1000 + (int(m[4]) - 48 ) * 100 + (int(m[5]) - 48 )* 10 + (int(m[6]) - 48);
-	for (int i = 7; i < message_len; i++)
+	for (int i = 0; i < message_len; i++)
 	{
 		std::cout << m[i];
 	}
 	std::cout << m << "\n";
 	std::cout << message_len << "\n";
-	std::vector<long long int> hector = {0};
-	long long int minw=0;
-	for (int i = 7; i < message_len; i++)
+	std::vector<long long int> hector = { 0 };
+	long long int minw = 0;
+	for (int i = 0; i < message_len; i++)
 	{
 		if (m[i] == ',')
 		{
@@ -130,7 +131,7 @@ void handleNewClient(SOCKET a)
 	int ms_l = new_msg.length();
 	std::cout << new_msg << "\n";
 	int the_port = (int(new_msg[ms_l - 1]) - 48) + (int(new_msg[ms_l - 2]) - 48) * 10 + (int(new_msg[ms_l - 3]) - 48) * 100 + ((int(new_msg[ms_l - 4]) - 48) * 1000);
-	
+
 	std::cout << the_port << "\n";
 
 	cv = socket(AF_INET, SOCK_STREAM, 0);
@@ -150,7 +151,7 @@ void handleNewClient(SOCKET a)
 
 	std::cout << "connected to: " << the_port << "\n";
 
-	
+
 	std::string leng = std::to_string(ms_l);
 	if (leng.length() == 2)
 		leng = "0000" + leng;
@@ -160,10 +161,11 @@ void handleNewClient(SOCKET a)
 		leng = "00" + leng;
 	if (leng.length() == 5)
 		leng = "0" + leng;
-	std::string an = std::string(1, m[0]) + leng + new_msg;
+	std::string an = std::string(1, code[0]) + leng + new_msg;
 	std::cout << "msg" << an << "\n";
-	
+
 	send(cv, an.c_str(), strlen(an.c_str()), 0);
 	std::cout << "sent to: " << the_port << "\n";
 	closesocket(cv);
 }
+
