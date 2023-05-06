@@ -6,17 +6,21 @@
 #include "LoginRequestHandler.h"
 #include "sendMsgToClientHandler.h"
 
-void login(buffer bf, int port, int clientsPublicKey, int clientsN) {
-	int token = 0; 
-	std::string Stoken = " ";
+void login(buffer bf, int port, int clientsPublicKey, int clientsN)
+{
 	struct LoginRequest
 	{
 		std::string username;
 		std::string password;
 	};
 
-	std::string dataValue(bf.begin(), bf.end());
+	json ans;
+	std::string ansAsStr = " ";
 
+	int token = 0; 
+	std::string tokenAsStr = " ";
+
+	std::string dataValue(bf.begin(), bf.end());
 	json j = json::parse(dataValue);
 
 	LoginRequest finalData = { j["username"], j["password"] };
@@ -27,18 +31,31 @@ void login(buffer bf, int port, int clientsPublicKey, int clientsN) {
 		{
 
 			token = generateToken();
+			tokenAsStr = std::to_string(token);
 			updateUsersInfo(finalData.username, port, clientsPublicKey, clientsN, token);
-			Stoken = std::to_string(token);
-			sendMsgToClient("user loged in successfully" + Stoken, port, clientsPublicKey, clientsN, CLIENT_LOG_IN_RESPONSE);
+
+			ans["msg"] = "user loged in successfully";
+			ans["token"] = tokenAsStr;
+			ansAsStr = ans.dump();
+
+			sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, CLIENT_LOGED_IN_SUCCESSFULLY);
 			std::cout << "user loged in successfully \n";
+
+			sendMsgsFromDbToUser(finalData.username, port, clientsPublicKey, clientsN);
 		}
 		else {
+			ans["msg"] = "password dosnt match";
+			ansAsStr = ans.dump();
+
+			sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, PASSWORD_DOSNT_MATCH);
 			std::cout << "password dosnt match \n";
-			sendMsgToClient("password dosnt match", port, clientsPublicKey, clientsN, CLIENT_LOG_IN_RESPONSE);
 		}
 	}
 	else {
+		ans["msg"] = "user dosnt exist Please sign up";
+		ansAsStr = ans.dump();
+
+		sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, USER_DOSNT_EXIST);
 		std::cout << "user dosnt exists \n";
-		sendMsgToClient("user dosnt exists", port, clientsPublicKey, clientsN, CLIENT_LOG_IN_RESPONSE);
 	}
 }

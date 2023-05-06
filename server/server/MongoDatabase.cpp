@@ -1,6 +1,8 @@
 #include "MongoDatabase.h"
 #include <bsoncxx/builder/basic/kvp.hpp>
 
+#include "sendMsgToClientHandler.h"
+
 extern std::mutex mongoMtx;
 extern mongocxx::client cli;
 extern mongocxx::database db;
@@ -200,9 +202,6 @@ bool isUserInactiveForHalfHour(std::string userName)
 
 void addNewmsg(std::string sendingUser, std::string receivingUser, std::string msg, int msgid)
 {
-	auto now = std::chrono::system_clock::now();
-	auto now_c = std::chrono::system_clock::to_time_t(now);
-
 	mongoMtx.lock();
 	mongocxx::collection usersColl = db["Messages"];
 	usersColl.insert_one(document{}
@@ -210,7 +209,6 @@ void addNewmsg(std::string sendingUser, std::string receivingUser, std::string m
 		<< "receivingUser" << receivingUser
 		<< "msg" << msg
 		<< "msgid" << msgid
-		<< "time" << std::ctime(&now_c)
 	<< finalize);
 	mongoMtx.unlock();
 }
@@ -220,5 +218,169 @@ void deleteMsgById(int msgid)
 	mongoMtx.lock();
 	mongocxx::collection usersColl = db["Messages"];
 	usersColl.delete_one(document{} << "msgid" << msgid << finalize);
+	mongoMtx.unlock();
+}
+
+int getClientPort(std::string username)
+{
+	mongoMtx.lock();
+	mongocxx::collection usersColl = db["Users"];
+	bsoncxx::stdx::optional<bsoncxx::document::value> maybeResult = usersColl.find_one(document{} << "Username" << username << finalize);
+	mongoMtx.unlock();
+
+	if (maybeResult) {
+		bsoncxx::document::view result = maybeResult->view();
+		bsoncxx::document::element portElement = result["port"];
+		if (portElement) {
+			return static_cast<int>(portElement.get_int32());
+		}
+	}
+
+	// Return a default port number or an error code to indicate that the client was not found.
+	return -1;
+}
+
+int getClientN(std::string username)
+{
+	mongoMtx.lock();
+	mongocxx::collection usersColl = db["Users"];
+	bsoncxx::stdx::optional<bsoncxx::document::value> maybeResult = usersColl.find_one(document{} << "Username" << username << finalize);
+	mongoMtx.unlock();
+
+	if (maybeResult) {
+		bsoncxx::document::view result = maybeResult->view();
+		bsoncxx::document::element clientsNElement = result["clientsN"];
+		if (clientsNElement) {
+			return static_cast<int>(clientsNElement.get_int64());
+		}
+	}
+
+	// Return a default clientsN number or an error code to indicate that the client was not found.
+	return -1;
+}
+
+int getClientPublicKey(std::string username)
+{
+	mongoMtx.lock();
+	mongocxx::collection usersColl = db["Users"];
+	bsoncxx::stdx::optional<bsoncxx::document::value> maybeResult = usersColl.find_one(document{} << "Username" << username << finalize);
+	mongoMtx.unlock();
+
+	if (maybeResult) {
+		bsoncxx::document::view result = maybeResult->view();
+		bsoncxx::document::element clientsPublicKeyElement = result["clientsPublicKey"];
+		if (clientsPublicKeyElement) {
+			return static_cast<int>(clientsPublicKeyElement.get_int32());
+		}
+	}
+
+	// Return a default clientsPublicKey value or an error code to indicate that the client was not found.
+	return -1;
+}
+
+void blockUser(std::string user, std::string blockedUser)
+{
+	mongoMtx.lock();
+	mongocxx::collection usersColl = db["Users"];
+	bsoncxx::stdx::optional<bsoncxx::document::value> result = usersColl.find_one(document{} << "Username" << user << finalize);
+
+	if (result) {
+		bsoncxx::document::view userDocView = result->view();
+		std::string blockedList = userDocView["Blocked"].get_utf8().value.to_string();
+
+		if (blockedList.find("," + blockedUser + ",") == std::string::npos) {
+			blockedList = "," + blockedUser + "," + blockedList;
+			usersColl.update_one(document{} << "Username" << user << finalize,
+				document{} << "$set" << open_document
+				<< "Blocked" << blockedList
+				<< close_document << finalize);
+		}
+	}
+
+	mongoMtx.unlock();
+}
+
+bool isBlocked(std::string user, std::string blockedUser)
+{
+	mongoMtx.lock();
+	mongocxx::collection usersColl = db["Users"];
+	bsoncxx::stdx::optional<bsoncxx::document::value> result = usersColl.find_one(document{} << "Username" << user << finalize);
+
+	bool isUserBlocked = false;
+	if (result) {
+		bsoncxx::document::view userDocView = result->view();
+		std::string blockedList = std::string(userDocView["Blocked"].get_utf8().value);
+
+		isUserBlocked = (blockedList.find("," + blockedUser + ",") != std::string::npos);
+	}
+
+	mongoMtx.unlock();
+	return isUserBlocked;
+}
+
+void unblockUser(std::string user, std::string unblockedUser)
+{
+	mongoMtx.lock();
+	mongocxx::collection usersColl = db["Users"];
+	bsoncxx::stdx::optional<bsoncxx::document::value> result = usersColl.find_one(document{} << "Username" << user << finalize);
+
+	if (result) {
+		bsoncxx::document::view userDocView = result->view();
+		std::string blockedList = userDocView["Blocked"].get_utf8().value.to_string();
+
+		std::string updatedBlockedList;
+		size_t pos = 0;
+		while (pos < blockedList.length()) {
+			size_t commaPos = blockedList.find(",", pos);
+			std::string curBlockedUser = blockedList.substr(pos, commaPos - pos);
+			pos = commaPos + 1;
+
+			if (curBlockedUser != unblockedUser) {
+				updatedBlockedList += "," + curBlockedUser;
+			}
+		}
+
+		if (!updatedBlockedList.empty()) {
+			updatedBlockedList = updatedBlockedList.substr(1) + ",";
+		}
+
+		usersColl.update_one(document{} << "Username" << user << finalize,
+			document{} << "$set" << open_document
+			<< "Blocked" << updatedBlockedList
+			<< close_document << finalize);
+	}
+
+	mongoMtx.unlock();
+}
+
+void sendMsgsFromDbToUser(std::string receivingUser, int port, int clientsPublicKey, int clientsN)
+{
+	json ans;
+	std::string ansAsStr = " ";
+
+	mongoMtx.lock();
+	mongocxx::collection messagesColl = db["Messages"];
+
+	bsoncxx::stdx::string_view receivingUserSV = receivingUser;
+	auto filter = document{} << "receivingUser" << receivingUserSV << finalize;
+
+	mongocxx::options::find opts{};
+	opts.projection(document{} << "sendingUser" << 1 << "msg" << 1 << "msgid" << 1 << finalize);
+
+	auto cursor = messagesColl.find(filter.view(), opts);
+
+	for (auto&& doc : cursor) {
+		std::string sendingUser = doc["sendingUser"].get_utf8().value.to_string();
+		std::string msg = doc["msg"].get_utf8().value.to_string();
+		int msgid = doc["msgid"].get_int32().value;
+
+		ans["sendingUser"] = sendingUser;
+		ans["msg"] = msg;
+		ans["id"] = msgid;
+		ansAsStr = ans.dump();
+
+		sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, MSG_FROM_CLIENT);
+	}
+
 	mongoMtx.unlock();
 }

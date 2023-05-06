@@ -82,13 +82,13 @@ void setkeys()//sets keys
 }
 
 // to encrypt the given number
-long long int encrypt(double message)
+long long int encrypt(double message, int pkToEncodWith, int nToEncodWith)
 {
-    int e = public_key;
+    int e = pkToEncodWith;
     long long int encrpyted_text = 1;
     while (e--) {
         encrpyted_text *= message;
-        encrpyted_text %= n;
+        encrpyted_text %= nToEncodWith;
     }
     return encrpyted_text;
 }
@@ -108,12 +108,12 @@ long long int decrypt(int encrpyted_text)
 // first converting each character to its ASCII value and
 // then encoding it then decoding the number to get the
 // ASCII and converting it to character
-std::vector<int> encoder(std::string message)
+std::vector<int> encoder(std::string message, int pkToEncodWith, int nToEncodWith)
 {
     std::vector<int> form;
     // calling the encrypting function in encoding function
     for (auto& letter : message)
-        form.push_back(encrypt((int)letter));
+        form.push_back(encrypt((int)letter,pkToEncodWith,nToEncodWith));
     return form;
 }
 

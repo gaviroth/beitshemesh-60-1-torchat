@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="blockingHandler.cpp" />
     <ClCompile Include="Encryption.cpp" />
     <ClCompile Include="LoginRequestHandler.cpp" />
     <ClCompile Include="LogOutRequestHandle.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="WSAInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blockingHandler.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="Encryption.h" />
     <ClInclude Include="json.hpp" />

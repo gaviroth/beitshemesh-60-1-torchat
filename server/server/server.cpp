@@ -1,7 +1,10 @@
 #include "Server.h"
 #include "Encryption.h"
+#include "msgHandler.h"
+#include "blockingHandler.h"
 #include "LoginRequestHandler.h"
 #include "SignUpRequestHandler.h"
+#include "LogOutRequestHandler.h"
 #include "sendMsgToClientHandler.h"
 
 SOCKET _serverSocket;
@@ -89,11 +92,11 @@ void clientHandler(SOCKET clientSocket)
 
 		unsigned int msgCode = static_cast<unsigned int>(data[0]);//byte 0 is msg code
 
-		dataLen = (int(data[1]) - 48) * 100000 + (int(data[2]) - 48) * 10000 + (int(data[3]) - 48) * 1000 + (int(data[4]) - 48) * 100 + (int(data[5]) - 48) * 10 + (int(data[6]) - 48);//take 1-4 byts and turn them from char to int to have the data lenght
+		dataLen = (int(data[1]) - 48) * 100000 + (int(data[2]) - 48) * 10000 + (int(data[3]) - 48) * 1000 + (int(data[4]) - 48) * 100 + (int(data[5]) - 48) * 10 + (int(data[6]) - 48);//take 1-6 byts and turn them from char to int to have the data lenght
 		
 		data = new char[dataLen];//rests data so you can receive json
 
-		msg = recv(clientSocket, data, dataLen, 0);//receive the rest of thr message
+		msg = recv(clientSocket, data, dataLen, 0);//receive the rest of the message
 		if (msg == INVALID_SOCKET)//check to make sure msg is valid
 		{
 			std::string str = "Error while recieving message from socket: ";
@@ -183,20 +186,27 @@ void clientHandler(SOCKET clientSocket)
 
 		switch (msgCode) // send msg to the relevant handler based on msg code 
 		{
-		case 111://SIGN UP
+		case CLIENT_SIGN_UP:
 			signup(bf, port, clientsPublicKey, clientsN);
 			break;
-		case 112://LOG IN
+		case CLIENT_LOG_IN:
 			login(bf, port, clientsPublicKey, clientsN);
 			break;
-		case 113://MSG
-			signup(bf, port, clientsPublicKey, clientsN);
+		case MSG_TO_CLIENT:
+			handelMsg(bf);
 			break;
-		case 114:
-			signup(bf, port, clientsPublicKey, clientsN);
+		case BLOCK_USER:
+			block(bf);
 			break;
-		default:
-			signup(bf, port, clientsPublicKey, clientsN);
+		case UNBLOCK_USER:
+			unblock(bf);
+			break;
+		case MSG_ACK:
+			msgReceived(bf);
+			break;
+		case CLIENT_LOG_OUT:
+			logOut(bf);
+			break;
 		}
 		closesocket(clientSocket);
 		
