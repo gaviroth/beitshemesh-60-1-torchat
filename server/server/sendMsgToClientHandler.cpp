@@ -8,9 +8,9 @@ std::string getRout() {
 	SOCKET _routerSocket;
 	std::string serverIP = "127.0.0.1";
 
-	char ports[12];
+	char mdlmServers[36];
 	std::string msg = "s";
-	std::string sports = "";
+	std::string SmdlmServers = "";
 
 	// we connect to client that uses TCP. thats why SOCK_STREAM & IPPROTO_TCP
 	_routerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -30,61 +30,34 @@ std::string getRout() {
 		throw std::exception("Cant connect to client");
 
 	send(_routerSocket, msg.c_str(), msg.size(), 0);  // last parameter: flag. for us will be 0. 
-	recv(_routerSocket, ports, 12, 0);
+	recv(_routerSocket, mdlmServers, 36, 0);
 	closesocket(_routerSocket);
 
-	for (int i = 0; i < 12; i++) {
-		sports = sports + ports[i];
+	for (int i = 0; i < 36; i++) {
+		SmdlmServers = SmdlmServers + mdlmServers[i];
 	}
-	return sports;
+	return SmdlmServers;
 }
 
-buffer putMsgTougther(std::string msg, int statusCode) {
-	buffer dataAns;
-	std::stringstream dataLenStr{};
+std::string putMsgTougther(std::string msg, int statusCode)
+{
+	std::string ans = "";
 
-	byte code = statusCode;
-	buffer ans = { code };//first byte is message code
+	char codeAsChar = static_cast<char>(statusCode);
+	ans.push_back(codeAsChar);
 
-	std::string Str = msg;
-	unsigned int msgLen = Str.length();
-	if (msgLen < 1000) {//if msg is less then 4 bytes add 0 to make it 4 byte without changing lan
-		if (msgLen < 100) {
-			if (msgLen < 10) {
-				dataLenStr << msgLen;// put length in string stream
-				std::string dataLenStrStr = dataLenStr.str();//put length in string 
-				dataLenStrStr = "000" + dataLenStrStr;
-				const char* dataLenAsCharArray = dataLenStrStr.c_str();//put length in c string
-				unsigned int sizeOfDataLenStrStr = dataLenStrStr.length(); //saves number of bytes 
-				ans.insert(ans.end(), dataLenAsCharArray, dataLenAsCharArray + sizeOfDataLenStrStr);//put length in buffer
-			}
-			else {
-				dataLenStr << msgLen;// put length in string stream
-				std::string dataLenStrStr = dataLenStr.str();//put length in string 
-				dataLenStrStr = "00" + dataLenStrStr;
-				const char* dataLenAsCharArray = dataLenStrStr.c_str();//put length in c string
-				unsigned int sizeOfDataLenStrStr = dataLenStrStr.length(); //saves number of bytes 
-				ans.insert(ans.end(), dataLenAsCharArray, dataLenAsCharArray + sizeOfDataLenStrStr);//put length in buffer
-			}
-		}
-		else {
-			dataLenStr << msgLen;// put length in string stream
-			std::string dataLenStrStr = dataLenStr.str();//put length in string 
-			dataLenStrStr = "0" + dataLenStrStr;
-			const char* dataLenAsCharArray = dataLenStrStr.c_str();//put length in c string
-			unsigned int sizeOfDataLenStrStr = dataLenStrStr.length(); //saves number of bytes 
-			ans.insert(ans.end(), dataLenAsCharArray, dataLenAsCharArray + sizeOfDataLenStrStr);//put length in buffer
-		}
-	}
-	else {
-		dataLenStr << msgLen;// put length in string stream
-		std::string dataLenStrStr = dataLenStr.str();//put length in string 
-		const char* dataLenAsCharArray = dataLenStrStr.c_str();//put length in c string
-		unsigned int sizeOfDataLenStrStr = dataLenStrStr.length(); //saves number of bytes 
-		ans.insert(ans.end(), dataLenAsCharArray, dataLenAsCharArray + sizeOfDataLenStrStr);//put length in buffer
-	}
-	dataAns = strToBuffer(Str); // put data in buffer
-	ans.insert(ans.end(), dataAns.begin(), dataAns.end());//insert data at the end of the buffer
+	std::string dataLenStrStr = std::to_string(msg.length());//put length in string 
+
+	if (dataLenStrStr.length() == 2)
+		dataLenStrStr = "0000" + dataLenStrStr;
+	if (dataLenStrStr.length() == 3)
+		dataLenStrStr = "000" + dataLenStrStr;
+	if (dataLenStrStr.length() == 4)
+		dataLenStrStr = "00" + dataLenStrStr;
+	if (dataLenStrStr.length() == 5)
+		dataLenStrStr = "0" + dataLenStrStr;
+
+	ans = ans + dataLenStrStr + msg;
 
 	return ans;
 }
@@ -94,38 +67,42 @@ void sendMsgToClient(std::string msg, int port, int clientsPublicKey, int client
 	SOCKET _clientSocket;
 	std::string serverIP = "127.0.0.1";
 
-	buffer ans;
+	std::vector<int> encodedMsg;
+	std::string encodedMsgAsStr = " ";
+
 	char temp = ' ';
-	int mdlserverPort = 0; 
-	std::string ports = "";
+	int tempN = 0;
+	int tempPk = 0;
+	int tempPort = 0; 
+	int mdlmanServerPort = 0;
 
-	ports = getRout();//get rout
+	std::string ans = "";
+	std::string Rout = "";
 
-	std::string cport = "";
-	cport = std::to_string(port);
-	ports = cport + ports;// put clients port at at the beging of ports
+	Rout = getRout();//get rout and kyes and Ns
 
-	// get first port in int
-	temp = ports.back();
-	ports = ports.substr(0, ports.length() - 1);
-	mdlserverPort = (int(temp)- 48);
+	encodedMsg = encoder(msg, clientsPublicKey, clientsN);
+	encodedMsgAsStr = vectorToString(encodedMsg);
+	encodedMsgAsStr = encodedMsgAsStr + std::to_string(port);
 
-	temp = ports.back();
-	ports = ports.substr(0, ports.length() - 1);
-	mdlserverPort = mdlserverPort + ((int(temp) - 48) * 10);
+	for (int i = 0; i < 3; i++) {
+		tempPort = std::stoi(Rout.substr(0, 4));
+		Rout.erase(0, 4);
 
-	temp = ports.back();
-	ports = ports.substr(0, ports.length() - 1);
-	mdlserverPort = mdlserverPort + ((int(temp) - 48) * 100);
+		tempPk = std::stoi(Rout.substr(0, 2));
+		Rout.erase(0, 2);
 
-	temp = ports.back();
-	ports = ports.substr(0, ports.length() - 1);
-	mdlserverPort = mdlserverPort + ((int(temp) - 48) * 1000);
+		tempN = std::stoi(Rout.substr(0, 6));
+		Rout.erase(0, 6);
 
-	msg = msg + ports;
-	ans = putMsgTougther(msg, msgCode);
+		encodedMsg = encoder(encodedMsgAsStr, tempPk, tempN);
+		encodedMsgAsStr = vectorToString(encodedMsg);
+		encodedMsgAsStr = encodedMsgAsStr + std::to_string(tempPort);
+	}
+	mdlmanServerPort = std::stoi(encodedMsgAsStr.substr(encodedMsgAsStr.length() - 4));
+	encodedMsgAsStr.erase(encodedMsgAsStr.length() - 4);
 
-	std::string strans(ans.begin(), ans.end());//turn to str to send to client (only turned to buffer to put msg togther)
+	ans = putMsgTougther(encodedMsgAsStr, msgCode);
 
 	// we connect to client that uses TCP. thats why SOCK_STREAM & IPPROTO_TCP
 	_clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -134,7 +111,7 @@ void sendMsgToClient(std::string msg, int port, int clientsPublicKey, int client
 		throw std::exception(__FUNCTION__ " - socket");
 
 	struct sockaddr_in sa = { 0 };
-	sa.sin_port = htons(mdlserverPort); // port that server will listen to
+	sa.sin_port = htons(mdlmanServerPort); // port that server will listen to
 	sa.sin_family = AF_INET;   // must be AF_INET
 	sa.sin_addr.s_addr = inet_addr(serverIP.c_str());
 
@@ -144,7 +121,7 @@ void sendMsgToClient(std::string msg, int port, int clientsPublicKey, int client
 	if (status == INVALID_SOCKET)
 		throw std::exception("Cant connect to client");
 
-	send(_clientSocket, strans.c_str(), strans.size(), 0);  // last parameter: flag. for us will be 0. 
+	send(_clientSocket, ans.c_str(), ans.size(), 0);  // last parameter: flag. for us will be 0. 
 
 	closesocket(_clientSocket);
 }
@@ -158,4 +135,16 @@ buffer strToBuffer(std::string str)//turns string into buffer
 	}
 
 	return ans;
+}
+
+std::string vectorToString(std::vector<int> vec) 
+{
+	std::string str;
+	for (auto i = vec.begin(); i != vec.end(); ++i) {
+		if (i != vec.begin()) {
+			str += ",";
+		}
+		str += std::to_string(*i);
+	}
+	return str;
 }

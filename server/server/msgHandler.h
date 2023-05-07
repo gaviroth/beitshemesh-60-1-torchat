@@ -2,7 +2,7 @@
 #include "buffer.h"
 
 int randomid();
-int generateid();
-void eraseidFromSet(int id);
-std::string returnJsonAsString();
-void handelMsg(buffer bf, int port, int clientsPublicKey, int clientsN);
+int generateMsgid();
+void handelMsg(buffer bf);
+void msgReceived(buffer bf);
+void eraseidFromSet(int msgid);
