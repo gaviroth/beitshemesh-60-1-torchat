@@ -103,7 +103,6 @@ void sendMsgToClient(std::string msg, int port, int clientsPublicKey, int client
 	encodedMsgAsStr.erase(encodedMsgAsStr.length() - 4);
 
 	ans = putMsgTougther(encodedMsgAsStr, msgCode);
-	std::cout << ans;
 
 	// we connect to client that uses TCP. thats why SOCK_STREAM & IPPROTO_TCP
 	_clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);

@@ -150,7 +150,7 @@ void clientHandler(SOCKET clientSocket)
 			}
 			std::string portString(portV.begin(), portV.end());
 			std::cout << portString;
-			port = stoi(portString);
+			port = std::stoi(portString);
 			//std::cout << port << "\n";
 
 			flag = true;//reset flag
@@ -165,7 +165,7 @@ void clientHandler(SOCKET clientSocket)
 
 			}
 			std::string clientsPublicKeyString(clientsPublicKeyV.begin(), clientsPublicKeyV.end());
-			clientsPublicKey = stoi(clientsPublicKeyString);
+			clientsPublicKey = std::stoi(clientsPublicKeyString);
 			//std::cout << clientsPublicKey << "\n";
 
 			flag = true;//reset flag
@@ -180,7 +180,7 @@ void clientHandler(SOCKET clientSocket)
 
 			}
 			std::string clientsNString(clientsNV.begin(), clientsNV.end());
-			clientsN = stoi(clientsNString);
+			clientsN = std::stoi(clientsNString);
 			//std::cout << clientsN << "\n";
 		}
 

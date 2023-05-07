@@ -21,6 +21,7 @@ void login(buffer bf, int port, int clientsPublicKey, int clientsN)
 	std::string tokenAsStr = " ";
 
 	std::string dataValue(bf.begin(), bf.end());
+	dataValue = dataValue.substr(1);
 	json j = json::parse(dataValue);
 
 	LoginRequest finalData = { j["username"], j["password"] };

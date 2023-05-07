@@ -22,6 +22,8 @@ void signup(buffer bf, int port, int clientsPublicKey , int clientsN)
 	std::string tokenAsStr = " ";
 
 	std::string dataValue(bf.begin(), bf.end());
+	//std::cout << dataValue;
+	dataValue = dataValue.substr(1);
 	json j = json::parse(dataValue);
 
 	SignupRequest finalData = { j["Email"], j["Username"], j["Password"] };

@@ -6,7 +6,7 @@
 #include "blockingHandler.h"
 #include "sendMsgToClientHandler.h"
 
-void block(buffer bf)
+void block(buffer bf)//dont know if i need //dataValue = dataValue  + '}';
 {
 	struct LoginRequest
 	{
@@ -23,6 +23,7 @@ void block(buffer bf)
 	std::string ansAsStr = " ";
 
 	std::string dataValue(bf.begin(), bf.end());
+	dataValue = dataValue.substr(1);
 	json j = json::parse(dataValue);
 
 	LoginRequest finalData = { j["token"], j["username"], j["blockedUser"] };
@@ -74,7 +75,7 @@ void block(buffer bf)
 	}
 }
 
-void unblock(buffer bf)
+void unblock(buffer bf)//dont know if i need //dataValue = dataValue  + '}';
 {
 	struct LoginRequest
 	{
@@ -91,6 +92,7 @@ void unblock(buffer bf)
 	std::string ansAsStr = " ";
 
 	std::string dataValue(bf.begin(), bf.end());
+	dataValue = dataValue.substr(1);
 	json j = json::parse(dataValue);
 
 	LoginRequest finalData = { j["token"], j["username"], j["unblockedUser"] };

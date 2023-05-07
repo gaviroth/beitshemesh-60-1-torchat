@@ -17,7 +17,7 @@ void creat()
 void addNewUser(std::string username, std::string password, std::string email, int port, int clientsPublicKey, int clientsN, int token)
 {
 	auto now = std::chrono::system_clock::now();
-	auto now_c = std::chrono::system_clock::to_time_t(now);
+	auto lastActiveTime = std::chrono::system_clock::time_point(std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count()));
 
 	mongoMtx.lock();
 	mongocxx::collection usersColl = db["Users"];
@@ -30,7 +30,7 @@ void addNewUser(std::string username, std::string password, std::string email, i
 		<< "n" << clientsN
 		<< "Token" << token
 		<< "publicKey" << clientsPublicKey
-		<< "lastActive" << std::ctime(&now_c)
+		<< "lastActive" << bsoncxx::types::b_date{ lastActiveTime }
 		<< "active" << bsoncxx::types::b_bool{ true }
 	<< finalize);
 	mongoMtx.unlock();
@@ -39,7 +39,7 @@ void addNewUser(std::string username, std::string password, std::string email, i
 bool updateUsersInfo(std::string userName, int port, int clientsPublicKey, int clientsN, int token)
 {
 	auto now = std::chrono::system_clock::now();
-	auto now_c = std::chrono::system_clock::to_time_t(now);
+	auto lastActiveTime = std::chrono::system_clock::time_point(std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count()));
 
 	mongoMtx.lock();
 	mongocxx::collection usersColl = db["Users"];
@@ -51,7 +51,7 @@ bool updateUsersInfo(std::string userName, int port, int clientsPublicKey, int c
 		<< "n" << clientsN
 		<< "Token" << token
 		<< "publicKey" << clientsPublicKey
-		<< "lastActive" << std::ctime(&now_c)
+		<< "lastActive" << bsoncxx::types::b_date{ lastActiveTime }
 		<< "active" << bsoncxx::types::b_bool{ true }
 		<< bsoncxx::builder::stream::close_document
 		<< bsoncxx::builder::stream::finalize;

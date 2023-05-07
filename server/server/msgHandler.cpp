@@ -30,16 +30,20 @@ void handelMsg(buffer bf)
 	std::string ansAsStr = " ";
 
 	std::string dataValue(bf.begin(), bf.end());
+	dataValue = dataValue.substr(1);
+	dataValue = dataValue  + '}';
 	json j = json::parse(dataValue);
 
 	msgFields finalData = { j["msg"], j["token"], j["sendingUser"], j["receivingUser"] };
+
+	int token = std::stoi(finalData.token);
 
 	if (doesUserExist(finalData.sendingUser))// check if sending User exists 
 	{
 		
 		if (doesUserExist(finalData.receivingUser))//check if receiving user exists 
 		{
-			if (isTokenValid(finalData.sendingUser, std::stoi(finalData.token)))
+			if (isTokenValid(finalData.sendingUser, token))
 			{
 				ans["msg"] = "message sent successfully";
 				ansAsStr = ans.dump();
@@ -101,7 +105,7 @@ void handelMsg(buffer bf)
 
 }
 
-void msgReceived(buffer bf)
+void msgReceived(buffer bf)//dont know if i need //dataValue = dataValue  + '}';
 {
 	int msgid = 0;
 	struct msgFields
@@ -110,6 +114,7 @@ void msgReceived(buffer bf)
 	};
 
 	std::string dataValue(bf.begin(), bf.end());
+	dataValue = dataValue.substr(1);
 	json j = json::parse(dataValue);
 
 	msgFields finalData = { j["msgid"]};

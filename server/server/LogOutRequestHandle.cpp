@@ -11,6 +11,8 @@ void logOut(buffer bf)
 		std::string username;
 	};
 	std::string dataValue(bf.begin(), bf.end());
+	dataValue = dataValue.substr(1);
+	dataValue = dataValue + '}';
 	json j = json::parse(dataValue);
 
 	LoginRequest finalData = { j["username"]};
