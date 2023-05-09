@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,6 +45,7 @@ namespace WpfApp1
                      
             }
             list.Text = to_show;
+            Username.Text=username;
         }
         private void Inbox(object sender, RoutedEventArgs e)
         {
@@ -78,15 +79,17 @@ namespace WpfApp1
             //send this to the server
             Thread.Sleep(100);
             error.Text = MainWindow.sign;
+            target.Text="";
         }
         private void submit1(object sender, RoutedEventArgs e)
         {
             MainWindow.unblocking(untarget.Text, my_conn);
-            string to_send = "{\"username\":\"" + my_username + "\",\"unblockedUser\":\"" + target.Text + "\",\"token\":\"" + MainWindow.token.ToString() + "\"}"; ;
+            string to_send = "{\"username\":\"" + my_username + "\",\"unblockedUser\":\"" + untarget.Text + "\",\"token\":\"" + MainWindow.token.ToString() + "\"}"; ;
             MainWindow.maker(to_send, "m");
             //send this to the server
             Thread.Sleep(100);
             error.Text = MainWindow.sign;
+            untarget.Text="";
         }
         private void logout(object sender, RoutedEventArgs e)
         {
