@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,6 +36,7 @@ namespace WpfApp1
             my_conn = conn;
             my_username = username;
             InitializeComponent();
+            Username.Text=username;
         }
         private void Inbox(object sender, RoutedEventArgs e)
         {
@@ -76,7 +77,8 @@ namespace WpfApp1
             MainWindow.maker(msg, "q");
             Thread.Sleep(100);
             error.Text = MainWindow.sign;
-
+            target.Text="";
+            untarget.Text="";
         }
     }
 }
