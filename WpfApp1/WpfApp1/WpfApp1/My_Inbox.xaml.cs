@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,6 +35,7 @@ namespace WpfApp1
         {
             my_conn = conn;
             my_username = username;
+            Username.Text=username
             InitializeComponent();
             SQLiteCommand command = new SQLiteCommand("SELECT * FROM Inbox", my_conn);
 
