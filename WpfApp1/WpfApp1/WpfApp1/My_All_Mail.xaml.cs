@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -48,6 +48,7 @@ namespace WpfApp1
 
             // Add the DataGrid to the Window's content
             this.Content = dataGrid;
+            Usename.Text=username;
         }
         private void Inbox(object sender, RoutedEventArgs e)
         {
