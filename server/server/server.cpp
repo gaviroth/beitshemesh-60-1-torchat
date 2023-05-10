@@ -149,9 +149,7 @@ void clientHandler(SOCKET clientSocket)
 
 			}
 			std::string portString(portV.begin(), portV.end());
-			std::cout << portString;
 			port = std::stoi(portString);
-			//std::cout << port << "\n";
 
 			flag = true;//reset flag
 			//loop takes clients public key
@@ -166,7 +164,6 @@ void clientHandler(SOCKET clientSocket)
 			}
 			std::string clientsPublicKeyString(clientsPublicKeyV.begin(), clientsPublicKeyV.end());
 			clientsPublicKey = std::stoi(clientsPublicKeyString);
-			//std::cout << clientsPublicKey << "\n";
 
 			flag = true;//reset flag
 			//loop takes clients n
@@ -181,7 +178,6 @@ void clientHandler(SOCKET clientSocket)
 			}
 			std::string clientsNString(clientsNV.begin(), clientsNV.end());
 			clientsN = std::stoi(clientsNString);
-			//std::cout << clientsN << "\n";
 		}
 
 		switch (msgCode) // send msg to the relevant handler based on msg code 

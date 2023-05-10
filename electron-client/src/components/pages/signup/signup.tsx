@@ -21,7 +21,7 @@ export default function SignUp() {
     ipcRenderer.send("signUp", data);
   };
 
-  ipcRenderer.on("signUpSuccess", (event, arg: any) => {
+  ipcRenderer.on("loginReact", (event, arg: any) => {
     localStorage.setItem("username", username);
     localStorage.setItem("token", arg.token);
     setLocked(false);

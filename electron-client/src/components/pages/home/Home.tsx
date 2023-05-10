@@ -124,8 +124,6 @@ export default function Home() {
       username: localStorage.getItem("username"),
     };
     ipcRenderer.send("logout", logoutData);
-    localStorage.removeItem("username");
-    localStorage.removeItem("token");
     navigate("/");
   };
 

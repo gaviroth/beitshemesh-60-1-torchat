@@ -39,13 +39,10 @@ void handelMsg(buffer bf)
 
 	if (doesUserExist(finalData.sendingUser))// check if sending User exists 
 	{
-		std::cout << "user exists \n";
 		if (doesUserExist(finalData.receivingUser))//check if receiving user exists 
 		{
-			std::cout << "user exists \n";
 			if (isTokenValid(finalData.sendingUser, token))
 			{
-				std::cout << "token valid \n";
 				ans["msg"] = "message sent successfully";
 				ansAsStr = ans.dump();
 
@@ -53,15 +50,12 @@ void handelMsg(buffer bf)
 				int clientsN = getClientN(finalData.sendingUser);
 				int clientsPublicKey = getClientPublicKey(finalData.sendingUser);
 
-				std::cout << port;
 				sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, MESSAGE_SENT_SUCCESSFULLY);
 				std::cout << "message sent successfully ,sent to user\n";
 				if (!isBlocked(finalData.receivingUser, finalData.sendingUser))
 				{
-					std::cout << "user not blocked\n";
 					msgid = generateMsgid();
 					addNewmsg(finalData.sendingUser, finalData.receivingUser, finalData.msg, msgid);
-					std::cout << "added to db\n";
 					//send msg to receiving user
 					if (isUserActive(finalData.receivingUser)) {
 						if (!isUserInactiveForHalfHour(finalData.receivingUser))
@@ -76,7 +70,6 @@ void handelMsg(buffer bf)
 							int clientsPublicKey = getClientPublicKey(finalData.receivingUser);
 
 							sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, MSG_FROM_CLIENT);
-							std::cout << "sent to user\n";
 						}
 					}
 				}
