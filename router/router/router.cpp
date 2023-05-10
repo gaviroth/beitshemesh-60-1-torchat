@@ -167,7 +167,9 @@ void startHandleRequests()
 
 int main()
 {
+	// Initialize the WSA API
 	WSAInitializer wsaInit;
+
 	startHandleRequests();
 	return 0;
 }

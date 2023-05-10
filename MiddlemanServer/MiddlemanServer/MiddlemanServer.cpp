@@ -9,8 +9,7 @@
 #pragma warning(disable:4996) // for inet_addr(got a error)
 std::string serverIP = "127.0.0.1";
 
-std::set<int> prime; // a set will be the collection of prime numbers,
-       // where we can select random primes p and q
+std::set<int> prime;
 int public_key;
 int private_key;
 int n;
@@ -50,7 +49,8 @@ void primefiller()
 // number from list because p!=q
 int pickrandomprime()
 {
-    std::srand(std::time(nullptr));
+    srand(time(NULL));
+
     int k = rand() % prime.size();
     auto it = prime.begin();
     while (k--)
@@ -85,16 +85,20 @@ void setkeys()
 
 int main(int argc, char* argv[])
 {
+    int port = (int(argv[1][0]) - 48) * 1000 + (int(argv[1][1]) - 48) * 100 + (int(argv[1][2]) - 48) * 10 + (int(argv[1][3]) - 48);
+
+    // Initialize the WSA API
+    WSAInitializer wsaInit;
+
+    primefiller();//fill primes for encryption
+    setkeys();//set keys for encryption
+
+    SOCKET routerSocket;
 	try
 	{
-		//mongocxx::instance instance{};
-		WSAInitializer wsaInit;
-        primefiller();
-        setkeys();
-        SOCKET cv;
-        cv = socket(AF_INET, SOCK_STREAM, 0);
+        routerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-        if (cv == INVALID_SOCKET)
+        if (routerSocket == INVALID_SOCKET)
             throw std::exception(__FUNCTION__ " - socket");
 
         struct sockaddr_in sa = { 0 };
@@ -102,25 +106,21 @@ int main(int argc, char* argv[])
         sa.sin_family = AF_INET;
         sa.sin_addr.s_addr = inet_addr(serverIP.c_str());
 
-        int status = connect(cv, (struct sockaddr*)&sa, sizeof(sa));
+        int status = connect(routerSocket, (struct sockaddr*)&sa, sizeof(sa));
 
-        if (status == INVALID_SOCKET){
-            int errorCode = WSAGetLastError();
-            std::cout << "socket() failed with error: " << errorCode << std::endl;
+        if (status == INVALID_SOCKET)
             throw std::exception("Cant connect to client");
-        }
-
-		int num = (int(argv[1][0]) - 48) * 1000 + (int(argv[1][1]) - 48) * 100 + (int(argv[1][2]) - 48) * 10 + (int(argv[1][3]) - 48);
+		
         std::string sn = std::to_string(n);
         std::string pkn = std::to_string(public_key);
         while (sn.size() != 6)
             sn = "0" + sn;
         while (pkn.size() != 2)
             pkn = "0" + pkn;
-        std::string ans = "pk" + std::to_string(num) + pkn + sn;
-        send(cv, ans.c_str(), ans.size(), 0);
+        std::string ans = "pk" + std::to_string(port) + pkn + sn;
+        send(routerSocket, ans.c_str(), ans.size(), 0);
 
-		serve(num);
+		serve(port);
 	}
 	catch (std::exception& e)
 	{
@@ -130,6 +130,3 @@ int main(int argc, char* argv[])
 	system("PAUSE");
 	return 0;
 }
-
-
-

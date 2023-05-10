@@ -29,6 +29,7 @@ int main()
 {
     try
     {
+        // Initialize the WSA API
         WSAInitializer wsaInit;
 
         primefiller();//fill primes for encryption

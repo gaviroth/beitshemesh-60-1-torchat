@@ -74,14 +74,16 @@ namespace WpfApp1
                         }
 
                         // Convert the received bytes to a string and print it
-                        string message = geter(Encoding.UTF8.GetString(buffer, 0, bytesRead));
-                        if (message[0] == 'b')
+                        string message1 = (Encoding.UTF8.GetString(buffer, 0, bytesRead));
+                        string message = geter(message1);
+
+                        if (message1[0] == 'b')
                             sign = "message sent successfully";
-                        if (message[0] == 'c')
+                        if (message1[0] == 'c')
                             sign = "token is not valid please log out";
-                        if (message[0] == 'f')
+                        if (message1[0] == 'f')
                             sign = "the target user does not exist";
-                        if (message[0] == 'r')
+                        if (message1[0] == 'r')
                         {
                             int start = message.IndexOf(":") + 1;
                             int end = message.IndexOf(",", start);
@@ -97,9 +99,9 @@ namespace WpfApp1
                             string returning = "{\"msgid\":\"" + message.Substring(message.Length - 8, 7) + "\"}";
                             maker(returning, "k");
                         }
-                        if (message[0] == 'd')
+                        if (message1[0] == 'd')
                             sign = "user blocked successfully";
-                        if (message[0] == 'e')
+                        if (message1[0] == 'e')
                             sign = "user unblocked successfully";
                         Console.WriteLine($"Received message from {client.Client.RemoteEndPoint}: {message}");// insert this messege to the inbox table
                     }
@@ -663,11 +665,11 @@ namespace WpfApp1
                 SQLiteConnection sqlite_conn = OpenDatabaseInDocuments(usernameBox.Text);
                 Connection = sqlite_conn;
 
-                Thread thread = new Thread(() => ListenOnPort(PORT));
-                thread.Start();
+                
                 token = int.Parse(new_msg.Substring(new_msg.Length - 7, 6));
                 Connection = sqlite_conn;
-                Menu menu = new Menu(usernameBox.Text,sqlite_conn);
+                Menu menu = new Menu(usernameBox.Text,sqlite_conn, my_private_key, my_num, my_public_key, PORT, token)
+;
                 menu.Show();
 
                 Close();
@@ -676,7 +678,7 @@ namespace WpfApp1
             {
                 if(new_msg[0]=='g')
                     ErrorMessageTextBlock.Text = "password does not match";
-                if (new_msg[0] == 'f')
+                if(new_msg[0] == 'f')
                     ErrorMessageTextBlock.Text = "user does not exist please sign up";
             }
         }
@@ -711,11 +713,10 @@ namespace WpfApp1
                 CreateTableinbox(conn);
                 Connection = conn;
 
-                Thread thread = new Thread(() => ListenOnPort(PORT));
-                thread.Start();
+                
                 token = int.Parse(new_msg.Substring(new_msg.Length - 7, 6));
                 Connection = conn;
-                Menu menu = new Menu(SignupUsernameTextBox.Text,conn);
+                Menu menu = new Menu(SignupUsernameTextBox.Text,conn, my_private_key, my_num, my_public_key, PORT, token);
                 menu.Show();
                 Close();
             }

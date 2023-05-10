@@ -249,9 +249,9 @@ int getClientN(std::string username)
 
 	if (maybeResult) {
 		bsoncxx::document::view result = maybeResult->view();
-		bsoncxx::document::element clientsNElement = result["clientsN"];
+		bsoncxx::document::element clientsNElement = result["n"];
 		if (clientsNElement) {
-			return static_cast<int>(clientsNElement.get_int64());
+			return static_cast<int>(clientsNElement.get_int32());
 		}
 	}
 
@@ -268,7 +268,7 @@ int getClientPublicKey(std::string username)
 
 	if (maybeResult) {
 		bsoncxx::document::view result = maybeResult->view();
-		bsoncxx::document::element clientsPublicKeyElement = result["clientsPublicKey"];
+		bsoncxx::document::element clientsPublicKeyElement = result["publicKey"];
 		if (clientsPublicKeyElement) {
 			return static_cast<int>(clientsPublicKeyElement.get_int32());
 		}
@@ -376,9 +376,9 @@ void sendMsgsFromDbToUser(std::string receivingUser, int port, int clientsPublic
 
 		ans["sendingUser"] = sendingUser;
 		ans["msg"] = msg;
-		ans["id"] = msgid;
+		ans["msgid"] = msgid;
 		ansAsStr = ans.dump();
-
+		std::cout << ansAsStr << " \n";
 		sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, MSG_FROM_CLIENT);
 	}
 

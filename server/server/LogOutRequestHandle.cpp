@@ -12,7 +12,7 @@ void logOut(buffer bf)
 	};
 	std::string dataValue(bf.begin(), bf.end());
 	dataValue = dataValue.substr(1);
-	dataValue = dataValue + '}';
+
 	json j = json::parse(dataValue);
 
 	LoginRequest finalData = { j["username"]};
@@ -20,6 +20,7 @@ void logOut(buffer bf)
 	if (doesUserExist(finalData.username))
 	{
 		updateStatusToOffline(finalData.username);
+		std::cout << "user loged out successfully \n";
 	}
 	else {
 		std::cout << "user dosnt exists \n";

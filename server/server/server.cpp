@@ -104,7 +104,7 @@ void clientHandler(SOCKET clientSocket)
 			throw std::exception(str.c_str());
 		}
 
-		for (int i = 0; i <= dataLen; i++)// loop puts msg in vector so you can decod msg
+		for (int i = 0; i < dataLen; i++)// loop puts msg in vector so you can decod msg
 		{
 			if (data[i] == ',')// if char is , push last number into vector
 			{
@@ -118,6 +118,7 @@ void clientHandler(SOCKET clientSocket)
 				Ctemp = Ctemp + (int(data[i]) - 48); // turn char to int and add to number if it has multple digits 
 			}
 		}
+		encodedmsg.push_back(Ctemp);
 
 		decodedmsg = decoder(encodedmsg);// decode msg 
 		std::cout << decodedmsg;
@@ -132,7 +133,6 @@ void clientHandler(SOCKET clientSocket)
 			}
 			bf.push_back(static_cast<unsigned char>(dataDecodedmsg[i])); 
 			temp = i + 1;
-
 		}
 
 		if (msgCode == CLIENT_SIGN_UP || msgCode == CLIENT_LOG_IN) //if msg is sign up or log in take port public key and n 
