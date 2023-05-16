@@ -45,7 +45,7 @@ void login(buffer bf, int port, int clientsPublicKey, int clientsN)
 			sendMsgsFromDbToUser(finalData.username, port, clientsPublicKey, clientsN);
 		}
 		else {
-			ans["msg"] = "wrong password";
+			ans["msg"] = "password dosnt match";
 			ansAsStr = ans.dump();
 
 			sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, PASSWORD_DOSNT_MATCH);
