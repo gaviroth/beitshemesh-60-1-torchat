@@ -108,10 +108,6 @@ export default function Home() {
     ipcRenderer.on("serverError", (event, arg) => {
       setAlert(arg.error);
     });
-    // return () => {
-    //   ipcRenderer.removeAllListeners("newMessage");
-    //   ipcRenderer.removeAllListeners("serverError");
-    // };
   }, []);
 
   useEffect(() => {

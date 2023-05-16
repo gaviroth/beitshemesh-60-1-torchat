@@ -42,15 +42,6 @@ export async function encrypt(
 ): Promise<string> {
   let ret = data;
 
-  // for (const server of route.slice(0, -1)) {
-  //   ret = await encryptOnce(
-  //     `${ret}`,
-  //     parseInt(server.publicKey).toString(),
-  //     parseInt(server.n).toString()
-  //   ).then((encrypted) => {
-  //     return `${encrypted}${server.port}`;
-  //   });
-  // }
   return encryptOnce(data, route[0].publicKey, route[0].n).then((encrypted) => {
     return `${encrypted}${route[0].port}`;
   }).then((encrypted) => {
@@ -66,18 +57,6 @@ export async function encrypt(
   }).then((encrypted) => {
     return `${encrypted}`;
   });
-
-  // const last = route.at(-1);
-  // if (!last) {
-  //   throw new Error("No last server");
-  // }
-  // ret = await encryptOnce(
-  //   ret,
-  //   parseInt(last.publicKey).toString(),
-  //   parseInt(last.n).toString()
-  // );
-
-  // return ret;
 }
 
 function GCD(num1: number, num2: number) {

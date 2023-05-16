@@ -80,17 +80,6 @@ export async function sendMessageToServer(message: Message): Promise<Message> {
           message.code
         )}${length}${encryptedMessage}`;
 
-        // // Create the message buffer according to the protocol
-        // const messageBuffer = Buffer.alloc(1 + 4 + encryptedMessageLength);
-        // messageBuffer.writeUInt8(message.code, 0);
-        // messageBuffer.writeUInt32BE(encryptedMessageLength, 1);
-        // messageBuffer.write(
-        //   encryptedMessageData,
-        //   5,
-        //   encryptedMessageLength,
-        //   "utf8"
-        // );
-
         // Send the message to the server
         client.write(messageBuffer);
       });

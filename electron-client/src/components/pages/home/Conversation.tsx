@@ -10,7 +10,7 @@ export default function Conversation({
   contactName,
   messages,
 }: ConversationProps) {
-  console.log(messages)
+  console.log(messages);
   const messagesDOM = messages.map((message, index) => {
     if (message.from === contactName) {
       return (
@@ -20,10 +20,12 @@ export default function Conversation({
         </ListGroupItem>
       );
     } else {
-      return <ListGroupItem key={index} style={{ color: "blue" }}>
-        <h2>{localStorage.getItem("username")}:</h2>
-        <p>{message.message}</p>
-      </ListGroupItem>;
+      return (
+        <ListGroupItem key={index} style={{ color: "blue" }}>
+          <h2>{localStorage.getItem("username")}:</h2>
+          <p>{message.message}</p>
+        </ListGroupItem>
+      );
     }
   });
 
