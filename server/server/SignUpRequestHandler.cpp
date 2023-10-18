@@ -2,10 +2,12 @@
 #include "MongoDatabase.h"
 
 #include <iostream>
+#include "tokenHandler.h" 
 #include "SignUpRequestHandler.h"
 #include "sendMsgToClientHandler.h"
 
-void signup(buffer bf, int port) {
+void signup(buffer bf, int port, int clientsPublicKey , int clientsN)
+{
 	struct SignupRequest
 	{
 		std::string email;
@@ -13,9 +15,15 @@ void signup(buffer bf, int port) {
 		std::string password;
 	};
 
+	json ans;
+	std::string ansAsStr = " ";
+
+	int token = 0;
+	std::string tokenAsStr = " ";
 
 	std::string dataValue(bf.begin(), bf.end());
-
+	//std::cout << dataValue;
+	dataValue = dataValue.substr(1);
 	json j = json::parse(dataValue);
 
 	SignupRequest finalData = { j["Email"], j["Username"], j["Password"] };
@@ -25,30 +33,43 @@ void signup(buffer bf, int port) {
 	
 	if (!doesUserExist(finalData.username))//check if username is taken
 	{
-
 		//check that password and email are valid 
 		if (std::regex_match(finalData.password, passwordCheck))
 		{
 			if (std::regex_match(finalData.email, emailCheck))
 			{
-				addNewUser(finalData.username, finalData.password, finalData.email); // sign up to the db
+				token = generateToken();
+				tokenAsStr = std::to_string(token);
+				addNewUser(finalData.username, finalData.password, finalData.email, port, clientsPublicKey, clientsN, token); // sign up to the db
+				
+				ans["msg"] = "user signed up successfully";
+				ans["token"] = tokenAsStr;
+				ansAsStr = ans.dump();
+
+				sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, CLIENT_SIGNED_UP_SUCCESSFULLY);
 				std::cout << "user signed up successfully \n";
-				sendMsgToClient("user signed up successfully", port);
 			}
 			else {
-				//std::cout << "email is not valid \n";
-				sendMsgToClient("email is not valid", port);
+				ans["msg"] = "email is not valid";
+				ansAsStr = ans.dump();
+
+				sendMsgToClient(ansAsStr, port , clientsPublicKey, clientsN, EMAIL_NOT_VALID);
+				std::cout << "email is not valid \n";
 			}
 		}   
 		else{
-
-			//std::cout << "password is not valid \n";
-			sendMsgToClient("password is not valid", port);
+			ans["msg"] = "password is not valid";
+			ansAsStr = ans.dump();
+			
+			sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, PASSWORD_NOT_VALID);
+			std::cout << "password is not valid \n";
 		}
 	}
 	else {
-
-		//std::cout << "Username already taken \n";
-		sendMsgToClient("Username already taken", port);
+		ans["msg"] = "username already taken";
+		ansAsStr = ans.dump();
+		
+		sendMsgToClient(ansAsStr, port, clientsPublicKey, clientsN, USERNAME_ALREADY_TAKEN);
+		std::cout << "username already taken \n";
 	}
 }
